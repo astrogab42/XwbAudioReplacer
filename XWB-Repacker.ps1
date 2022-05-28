@@ -1,12 +1,12 @@
 ##### Initialization #####
 $runMISE = $false; # $false # What to run the game?
-$wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # !!! change to Explorer + file ini !!!
-$XWBToolFolder = "C:\MISE-ITA\DoppiaggioITA\XWBTool4543" # !!! change to Explorer + file ini !!!
-$Speechxwb = "Speech.xwb" # !!! change to Explorer + file ini !!!
-$header = "header.bin" # !!! change to Explorer + file ini !!!
-$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb" # !!! change to Explorer + file ini !!!
-$gameFolder = "C:\GOG Games\Monkey Island 1 SE" # !!! change to Explorer + file ini !!!
-$MISE = "Monkey Island 1 - Special Edition" # !!! change to Explorer + file ini !!!
+$wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" 
+$XWBToolFolder = "C:\MISE-ITA\DoppiaggioITA\XWBTool4543" 
+$Speechxwb = "Speech.xwb" 
+$header = "header.bin" 
+$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb" 
+$gameFolder = "C:\GOG Games\Monkey Island 1 SE" 
+$MISE = "Monkey Island 1 - Special Edition" 
 
 ##### .NET code #####
 Add-Type -TypeDefinition @"
