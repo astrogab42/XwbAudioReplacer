@@ -1,7 +1,7 @@
 ##### Initialization #####
 $runMISE = $false; # $false # What to run the game?
 $wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" 
-$XWBToolFolder = "C:\MISE-ITA\DoppiaggioITA\XWBTool4543" 
+$XWBToolFolder = ".\XWB-Extractor" 
 $Speechxwb = "Speech.xwb" 
 $header = "header.bin" 
 $SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb" 
