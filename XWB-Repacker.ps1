@@ -1,12 +1,12 @@
 ##### Initialization #####
-$runMISE = $false; # $false # What to run the game?
-$wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" 
-$XWBToolFolder = "C:\MISE-ITA\DoppiaggioITA\XWBTool4543" 
-$Speechxwb = "Speech.xwb" 
-$header = "header.bin" 
-$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb" 
-$gameFolder = "C:\GOG Games\Monkey Island 1 SE" 
-$MISE = "Monkey Island 1 - Special Edition" 
+$runMISE = $false; #Do you want to run the game at the end of the script? $true/$false
+$wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+$XWBToolFolder = "C:\MISE-ITA\DoppiaggioITA\XWBTool4543"
+$Speechxwb = "Speech.xwb"
+$header = "header.bin"
+$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
+$gameFolder = "C:\GOG Games\Monkey Island 1 SE"
+$MISE = "Monkey Island 1 - Special Edition"
 
 ##### .NET code #####
 Add-Type -TypeDefinition @"
@@ -57,5 +57,5 @@ if ($runMISE) {
     Start-Process -FilePath "MISE.exe" -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
 }
 else {
-    Write-Host "You choose not to start"$MISE
+    Write-Host "You chose not to start"$MISE
 }
