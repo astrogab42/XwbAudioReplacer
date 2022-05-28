@@ -1,0 +1,4 @@
+- il tool funziona con più versioni di xwbtool, in base alla rilevazione dell'header del file xwb originale
+- il tool controlla che la dimensione dei file wav sia conforme
+- il tool modifica solo la parte di header relativa al timestamp, 8 byte da 0x8c.
+- due tool vengono creati: XWB extractor e XWB repacker. xwb extractor estrae i file wav usando towav.exe e li rinomina correttamente, xwb repacker ricostruisce l'xwb per essere testato.
