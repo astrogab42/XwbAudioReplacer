@@ -48,6 +48,8 @@ Write-Host "Change header of $Speechxwb."
 Write-Host "Remove temporary header file."
 Remove-Item $header # work clean
 
+
+########################################################################## TO BE TESTED
 ##### Move Speech.xwb to MISE folder #####
 if (-not(Test-Path -Path $audioGameFolder"\"$Speechxwb".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
      try {
@@ -62,6 +64,7 @@ if (-not(Test-Path -Path $audioGameFolder"\"$Speechxwb".original" -PathType Leaf
      Write-Host "File $Speechxwb.original NOT created because it already exists."
  }
 Copy-Item -Path $Speechxwb -Destination $gameFolder"\audio" # Copy new Speech.xwb to MISE folder
+#######################################################################################
 
 ##### Start the game #####
 if ($runMISE) {
