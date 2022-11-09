@@ -1,56 +1,115 @@
+##########################
+######## Functions #######
+##########################
+function Set-Configuration { # get and store configuration in config file
+
+    param (
+        $ConfigFile
+    )
+
+    # Get configuration
+    $runGame                =       $false; # do you want to run the game at the end of the script? $true/$false
+    $wavListFolder          =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+    $XWBToolFolder          =       ".\XWB-Extractor"
+    $SpeechxwbOriginal      =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
+    $gameFolder             =       "C:\GOG Games\Monkey Island 1 SE"
+    $audioGameFolder        =       "C:\GOG Games\Monkey Island 1 SE\audio"
+    $gameName               =       $gameFolder.Split("\")[-1] # use game path to store game name
+    $exeGame                =       "MISE.exe"
+    
+    # Store configuration to file
+    Add-Content -Path $configFile -Value $runGame, $wavListFolder, $XWBToolFolder, $SpeechxwbOriginal, $gameFolder, $audioGameFolder, $gameName, $exeGame
+}
+
+##########################
 ##### Initialization #####
-$scriptName = "XWB-Repacker"
+##########################
+$scriptName = "XWB-Repacker" # name of this script
+
+##########################
+##### Configuration ######
+##########################
 $configFile = ".\xwbrepacker.config" # config file
+
+# Check on config file existance
 if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not exist, create it.
     try {
         $null = New-Item -ItemType File -Path $configFile -Force -ErrorAction Stop
-        Write-Host "The config file $configFile has been created."
+        Write-Debug "The config file $configFile has been created."
         $initWindowsPrompt = $true
 
-        # create configuration
-        $runGame            =       $false; # do you want to run the game at the end of the script? $true/$false
-        $runGame            >>      $configFile
-        $wavListFolder      =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
-        $wavListFolder      >>      $configFile
-        $XWBToolFolder      =       ".\XWB-Extractor"
-        $XWBToolFolder      >>      $configFile
-        $Speechxwb          =       "Speech.xwb"
-        $Speechxwb          >>      $configFile
-        $SpeechxwbOriginal  =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
-        $SpeechxwbOriginal  >>      $configFile
-        $gameFolder         =       "C:\GOG Games\Monkey Island 1 SE"
-        $gameFolder         >>      $configFile
-        $audioGameFolder    =       "C:\GOG Games\Monkey Island 1 SE\audio"
-        $audioGameFolder    >>      $configFile
-        $gameName           =       $gameFolder.Split("\")[-1] # use game path to store game name
-        $gameName           >>      $configFile
-        $exeGame            =       "MISE.exe"
-        $exeGame            >>      $configFile
+        Set-Configuration -ConfigFile $configFile # get and store configuration in config file
     }
     catch {
         throw $_.Exception.Message
     }
 }
-else { # if the file already exists, show the message and do nothing.
-    Write-Host "The config file already exists. This is the configuration:"
-    Get-Content $configFile # show init file to the user
-
-    $title   = "$scriptName Configuration"
-    $msg     = "Do you want to change the configuration?"
-    $options = "&Yes", "&No"
-    $default = 1  # 0=Yes, 1=No
-
-    do {
-        $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-        if ($response -eq 0) {
-            
-    }
-    } until ($response -eq 1)
+else { # if the file already exists, show the message and do nothing
+    Write-Debug "The config file already exists."
 }
+
+# Store current configuration in variables for this script
+$i = 0
+$configTableVal = [string[]]::new((Get-Content $configFile).Length) # initiate the array
+foreach($line in Get-Content $configFile) { # get config from file
+    $configTableVal[$i] = $line
+    $i++
+}
+
+if ($configTableVal -eq "False") {
+    $runGame = $false
+}
+else {
+    $runGame = $true
+}
+$wavListFolder = $configTableVal[1]
+$XWBToolFolder = $configTableVal[2]
+$SpeechxwbOriginal = $configTableVal[3]
+$gameFolder = $configTableVal[4]
+$audioGameFolder = $configTableVal[5]
+$gameName = $configTableVal[6]
+$exeGame = $configTableVal[7]
+
+$configTableKey = @("runGame","wavListFolder","XWBToolFolder","SpeechxwbOriginal","gameFolder","audioGameFolder","gameName","exeGame")
+[int]$max = $configTableKey.Count
+$configTableId = 0..($max-1)
+$configTable = for ($i = 0; $i -lt $max; $i++) {
+    [PSCustomObject]@{
+        ID = $configTableId[$i]
+        Parameter = $configTableKey[$i]
+        Value = $configTableVal[$i]
+    }
+}
+
+# show config to user
+Write-Information "This is your current configuration:"
+$configTable | Format-Table
+
+
+$title   = "" #"$scriptName Configuration"
+$msg     = "Do you want to change the configuration?"
+$options = "&Yes", "&No"
+$default = 1  # 0=Yes, 1=No
+
+do {
+    $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    if ($response -eq 0) {
+        Write-Host "You chose Y"
+}
+} until ($response -eq 1)
+
+
+
+
+
 $header = "header.bin"
+$Speechxwb = "Speech.xwb"
 
 ### read content of $configFile
 
+
+
+exit
 
 ##### .NET code #####
 Add-Type -TypeDefinition @"
