@@ -1,14 +1,56 @@
 ##### Initialization #####
-$runGame = $false; #Do you want to run the game at the end of the script? $true/$false
-$wavListFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
-$XWBToolFolder = ".\XWB-Extractor"
-$Speechxwb = "Speech.xwb"
+$scriptName = "XWB-Repacker"
+$configFile = ".\xwbrepacker.config" # config file
+if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not exist, create it.
+    try {
+        $null = New-Item -ItemType File -Path $configFile -Force -ErrorAction Stop
+        Write-Host "The config file $configFile has been created."
+        $initWindowsPrompt = $true
+
+        # create configuration
+        $runGame            =       $false; # do you want to run the game at the end of the script? $true/$false
+        $runGame            >>      $configFile
+        $wavListFolder      =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+        $wavListFolder      >>      $configFile
+        $XWBToolFolder      =       ".\XWB-Extractor"
+        $XWBToolFolder      >>      $configFile
+        $Speechxwb          =       "Speech.xwb"
+        $Speechxwb          >>      $configFile
+        $SpeechxwbOriginal  =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
+        $SpeechxwbOriginal  >>      $configFile
+        $gameFolder         =       "C:\GOG Games\Monkey Island 1 SE"
+        $gameFolder         >>      $configFile
+        $audioGameFolder    =       "C:\GOG Games\Monkey Island 1 SE\audio"
+        $audioGameFolder    >>      $configFile
+        $gameName           =       $gameFolder.Split("\")[-1] # use game path to store game name
+        $gameName           >>      $configFile
+        $exeGame            =       "MISE.exe"
+        $exeGame            >>      $configFile
+    }
+    catch {
+        throw $_.Exception.Message
+    }
+}
+else { # if the file already exists, show the message and do nothing.
+    Write-Host "The config file already exists. This is the configuration:"
+    Get-Content $configFile # show init file to the user
+
+    $title   = "$scriptName Configuration"
+    $msg     = "Do you want to change the configuration?"
+    $options = "&Yes", "&No"
+    $default = 1  # 0=Yes, 1=No
+
+    do {
+        $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+        if ($response -eq 0) {
+            
+    }
+    } until ($response -eq 1)
+}
 $header = "header.bin"
-$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
-$gameFolder = "C:\GOG Games\Monkey Island 1 SE"
-$audioGameFolder = "C:\GOG Games\Monkey Island 1 SE\audio"
-$game = "Monkey Island 1 - Special Edition"
-$exeGame = "MISE.exe"
+
+### read content of $configFile
+
 
 ##### .NET code #####
 Add-Type -TypeDefinition @"
@@ -69,9 +111,9 @@ Copy-Item -Path $Speechxwb -Destination $audioGameFolder # Copy new Speech.xwb t
 
 ##### Start the game #####
 if ($runGame) {
-    Write-Host $game" is starting..."
+    Write-Host $gameName" is starting..."
     Start-Process -FilePath $exeGame -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
 }
 else {
-    Write-Host "You chose not to start $game."
+    Write-Host "You chose not to start $gameName."
 }
