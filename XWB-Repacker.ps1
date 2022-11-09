@@ -53,7 +53,7 @@ Remove-Item $header # work clean
 ##### Move Speech.xwb to MISE folder #####
 if (-not(Test-Path -Path $audioGameFolder"\"$Speechxwb".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
      try {
-         Rename-Item -Path $gameFolder"\audio\"$Speechxwb -NewName $Speechxwb".original"
+         Rename-Item -Path $audioGameFolder"\"$Speechxwb -NewName $Speechxwb".original"
          Write-Host "File $Speechxwb.original created as copy of the original $Speechxwb."
      }
      catch {
@@ -63,7 +63,7 @@ if (-not(Test-Path -Path $audioGameFolder"\"$Speechxwb".original" -PathType Leaf
  else { # If the file already exists, show the message and do nothing.
      Write-Host "File $Speechxwb.original NOT created because it already exists."
  }
-Copy-Item -Path $Speechxwb -Destination $gameFolder"\audio" # Copy new Speech.xwb to MISE folder
+Copy-Item -Path $Speechxwb -Destination $audioGameFolder # Copy new Speech.xwb to MISE folder
 #######################################################################################
 
 ##### Start the game #####
