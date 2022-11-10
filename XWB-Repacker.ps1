@@ -15,7 +15,9 @@ function Set-Configuration {
     $SpeechxwbOriginal      =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
     $gameFolder             =       "C:\GOG Games\Monkey Island 1 SE"
     $audioGameFolder        =       "C:\GOG Games\Monkey Island 1 SE\audio"
+    ######### andrebbe rimosso per pulizia
     $gameName               =       $gameFolder.Split("\")[-1] # use game path to store game name
+    ######### andrebbe rimosso per pulizia
     $exeGame                =       "MISE.exe"
     
     # Store configuration to file
@@ -192,12 +194,9 @@ $configTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableK
 Write-Host "This is your new configuration:"
 $configTable | Format-Table
 
+# other variables initiation
 $header = "header.bin"
-$Speechxwb = "Speech.xwb"
-
-### read content of $configFile
-
-
+$Speechxwb = $SpeechxwbOriginal.Split("\")[-1]
 
 exit
 
