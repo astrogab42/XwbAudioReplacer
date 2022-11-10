@@ -1,8 +1,9 @@
 ##########################
 ######## Functions #######
 ##########################
-function Set-Configuration { # get and store configuration in config file
 
+# get and store configuration in config file
+function Set-Configuration {
     param (
         $ConfigFile
     )
@@ -21,6 +22,82 @@ function Set-Configuration { # get and store configuration in config file
     Add-Content -Path $configFile -Value $runGame, $wavListFolder, $XWBToolFolder, $SpeechxwbOriginal, $gameFolder, $audioGameFolder, $gameName, $exeGame
 }
 
+
+# edit config file
+function Edit-Configuration {
+    param (
+        $ConfigKey,
+        $ConfigFile,
+        [int16]$Index
+    )
+
+    if ($ConfigKey -eq "runGame") { # specific case to match true/false values
+        do {
+            $prompt = Read-Host "What is the new value? [True/False]" # prompt user to insert new value from keyboard 
+        } until ($prompt -eq "True" -Or $prompt -eq "False")
+
+        if ($prompt -eq "False") {
+            $output = $false
+        }
+        else {
+            $output = $true
+        }
+        
+    }
+    else {
+        $output = Read-Host "Please, enter the new value" # prompt user to insert new value from keyboard
+    }
+
+    $content = Get-Content $ConfigFile # Get file content and store it into variable
+    $content[$Index-1] = $output # Replace the line number 0 by a new text
+    $content | Set-Content $ConfigFile # Set the new content
+
+    return $output
+}
+
+function Build-ConfigTable {
+    param (
+        [int16[]]$TableId,
+        [string[]]$TableKey,
+        [string[]]$TableVal
+    )
+
+    $configTable = for ($i = 0; $i -lt $max; $i++) {
+        [PSCustomObject]@{
+            ID = $TableId[$i]
+            Parameter = $TableKey[$i]
+            Value = $TableVal[$i]
+        }
+    }
+
+    return $configTable
+}
+
+##### .NET code #####
+# replace data in file as byte stream
+Add-Type -TypeDefinition @"
+using System;
+using System.IO;
+using System.Text;
+using System.Linq;
+
+public class GPSTools
+{
+    public static void ReplaceBytes(string fileName, string replaceFileName, int length, int offset = 0)
+    {
+        byte[] newData = File.ReadAllBytes(replaceFileName);
+        if(length != 0)
+        {
+            newData = newData.Take(length).ToArray();
+        }
+        Stream stream = File.Open(fileName, FileMode.Open);
+        stream.Position = offset;
+        stream.Write(newData, 0, newData.Length);
+        stream.Close();
+    }
+}
+"@
+
 ##########################
 ##### Initialization #####
 ##########################
@@ -34,8 +111,9 @@ $configFile = ".\xwbrepacker.config" # config file
 # Check on config file existance
 if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not exist, create it.
     try {
+        Write-Host "The config file $configFile does not exists. Creating..."
         $null = New-Item -ItemType File -Path $configFile -Force -ErrorAction Stop
-        Write-Debug "The config file $configFile has been created."
+        Write-Host "The config file $configFile has been created."
         $initWindowsPrompt = $true
 
         Set-Configuration -ConfigFile $configFile # get and store configuration in config file
@@ -45,7 +123,7 @@ if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not e
     }
 }
 else { # if the file already exists, show the message and do nothing
-    Write-Debug "The config file already exists."
+    Write-Host "The config file already exists."
 }
 
 # Store current configuration in variables for this script
@@ -72,20 +150,14 @@ $exeGame = $configTableVal[7]
 
 $configTableKey = @("runGame","wavListFolder","XWBToolFolder","SpeechxwbOriginal","gameFolder","audioGameFolder","gameName","exeGame")
 [int]$max = $configTableKey.Count
-$configTableId = 0..($max-1)
-$configTable = for ($i = 0; $i -lt $max; $i++) {
-    [PSCustomObject]@{
-        ID = $configTableId[$i]
-        Parameter = $configTableKey[$i]
-        Value = $configTableVal[$i]
-    }
-}
+$configTableId = 1..$max
+$configTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $configTableVal
 
 # show config to user
-Write-Information "This is your current configuration:"
+Write-Host "This is your current configuration:"
 $configTable | Format-Table
 
-
+# edit configuration
 $title   = "" #"$scriptName Configuration"
 $msg     = "Do you want to change the configuration?"
 $options = "&Yes", "&No"
@@ -94,13 +166,31 @@ $default = 1  # 0=Yes, 1=No
 do {
     $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
     if ($response -eq 0) {
-        Write-Host "You chose Y"
-}
-} until ($response -eq 1)
 
+        $title   = "" #"$scriptName Configuration"
+        $msg     = "Choose the ID you want to change"
+        $options = "&Cancel", "&1", "&2", "&3", "&4", "&5", "&6", "&7", "&8"
+        $default = 0  # 0=Cancel
 
+        do {
+            $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+            switch ($response) {
+                1 {$runGame = $configTableVal[0] = Edit-Configuration -ConfigKey "runGame" -ConfigFile $configFile -Index 1} # see custom function above
+                2 {$wavListFolder = $configTableVal[1] = Edit-Configuration -ConfigKey "wavListFolder" -ConfigFile $configFile -Index 2}
+                3 {$XWBToolFolder = $configTableVal[2] = Edit-Configuration -ConfigKey "XWBToolFolder" -ConfigFile $configFile -Index 3}
+                4 {$SpeechxwbOriginal = $configTableVal[3] = Edit-Configuration -ConfigKey "SpeechxwbOriginal" -ConfigFile $configFile -Index 4}
+                5 {$gameFolder = $configTableVal[4] = Edit-Configuration -ConfigKey "gameFolder" -ConfigFile $configFile -Index 5}
+                6 {$audioGameFolder = $configTableVal[5] = Edit-Configuration -ConfigKey "audioGameFolder" -ConfigFile $configFile -Index 6}
+                7 {$gameName = $configTableVal[6] = Edit-Configuration -ConfigKey "gameName" -ConfigFile $configFile -Index 7}
+                8 {$exeGame = $configTableVal[7] = Edit-Configuration -ConfigKey "exeGame" -ConfigFile $configFile -Index 8}
+            }
+        } until ($response -eq $default)
+    }
+} until ($response -eq $default)
 
-
+$configTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $configTableVal
+Write-Host "This is your new configuration:"
+$configTable | Format-Table
 
 $header = "header.bin"
 $Speechxwb = "Speech.xwb"
@@ -110,30 +200,6 @@ $Speechxwb = "Speech.xwb"
 
 
 exit
-
-##### .NET code #####
-Add-Type -TypeDefinition @"
-using System;
-using System.IO;
-using System.Text;
-using System.Linq;
-
-public class GPSTools
-{
-    public static void ReplaceBytes(string fileName, string replaceFileName, int length, int offset = 0)
-    {
-        byte[] newData = File.ReadAllBytes(replaceFileName);
-        if(length != 0)
-        {
-            newData = newData.Take(length).ToArray();
-        }
-        Stream stream = File.Open(fileName, FileMode.Open);
-        stream.Position = offset;
-        stream.Write(newData, 0, newData.Length);
-        stream.Close();
-    }
-}
-"@
 
 ##### Build xwb file from wav #####
 Write-Host "Change directory to XWBTool"
