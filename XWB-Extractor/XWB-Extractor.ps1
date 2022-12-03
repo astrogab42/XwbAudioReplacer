@@ -1,12 +1,18 @@
 ﻿
 # Change directory: place you "towav"-wav folder as next variable
-# $toWavExtactionPath = "C:\MISE-ITA\DoppiaggioITA\audio estratto\con numero davanti (towav)"
-$toWavExtactionPath = "D:\Progetti Personali\Monkey Island - Doppiaggio in italiano\audio estratto\MISE-ITA\DoppiaggioITA\audio estratto\con numero davanti (towav)"
-Set-Location $toWavExtactionPath # cd path
+### GAB ###
+$inputFolder = "C:\MISE-ITA\DoppiaggioITA\traccewav" #input
+### STEVE ###
+# $toWavExtactionPath = "D:\Progetti Personali\Monkey Island - Doppiaggio in italiano\audio estratto\MISE-ITA\DoppiaggioITA\audio estratto\con numero davanti (towav)"
 
-Get-ChildItem . -Filter *.wav | ForEach-Object {
-    $number = $_.Name.Split(" ")[0]
-    Write-Host $number
+$renamedFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" #output
+# Set-Location $toWavExtactionPath # cd path
+
+$fileList = Get-ChildItem $inputFolder -Filter *.wav
+$fileName = [string[]]::new($fileList.Length) # initiate the array
+ForEach ($thisFile in $fileList.Name) {
+    $number = $thisFile.Split(" ")[0]
+    #$newFileName = $number
     exit
 }
 
@@ -19,4 +25,18 @@ foreach file presente nella cartella {
        if subpattern1 ha 3 cifre...
        if subpattern1 ha 4 cifre...
  }
+#>
+
+<#
+Get-ChildItem . -Filter *.wav | ForEach-Object {
+    $CurrentFile = $_
+    ForEach ($wavNewName in $wavNewNameList) {
+        if ($CurrentFile.Name -ilike $wavNewName.originalName) {
+            Rename-Item $CurrentFile.Name $wavNewName.finalName
+            Write-Host "Renaming " $CurrentFile " with " $wavNewName "..."
+            Write-Host "File renamed!"
+            Write-Host "##########"
+        }
+    }
+}
 #>
