@@ -8,6 +8,11 @@ $inputFolder = "C:\MISE-ITA\DoppiaggioITA\traccewav" #input
 $renamedFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" #output
 # Set-Location $toWavExtactionPath # cd path
 
+<#
+Sezione dedicata a towav.exe per estrazione wav da XWB file originale
+#>
+
+
 $fileList = Get-ChildItem $inputFolder -Filter *.wav
 $fileName = [string[]]::new($fileList.Length) # initiate the array
 ForEach ($thisFile in $fileList.Name) {
