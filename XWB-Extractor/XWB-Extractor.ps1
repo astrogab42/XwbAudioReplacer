@@ -1,13 +1,12 @@
-﻿
-# Change directory: place you "towav"-wav folder as next variable
+﻿##### INITIALIZATION #####
 $ToWavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+$SpeechxwbOriginal = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
 
+# extract wav from xwb
+$extractWav = .\towav.exe $SpeechxwbOriginal 
+Move-Item *.wav $ToWavOutputFolder
 
-<#
-Sezione dedicata a towav.exe per estrazione wav da XWB file originale
-#>
-
-
+# Rename files
 $fileList = Get-ChildItem $ToWavOutputFolder -Filter *.wav
 ForEach ($thisFile in $fileList.Name) {
     $number = $thisFile.Split(" ")[0]
