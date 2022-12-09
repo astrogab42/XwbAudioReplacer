@@ -30,6 +30,7 @@ function Assert-FolderExists {
         $Folder
     )
 
+    Write-HostInfo -Text "Check existance of $Folder"
     if (-not(Test-Path $Folder)) { # if the folder does not exists
         Write-HostWarn -Text "The path you selected does not exists."
         Write-HostInfo -Text "Path: $Folder" 
@@ -51,6 +52,9 @@ function Assert-FolderExists {
         } until ($response -eq $default -Or (Test-Path $Folder))
 
     }
+    else {
+        Write-HostInfo -Text "$Folder exists!"
+    }
 }
 
 # check file existance 
@@ -59,12 +63,16 @@ function Assert-FileExists {
         $File
     )
 
+    Write-HostInfo -Text "Check existance of $File"
     if (-not(Test-Path $File)) { # if the file does not exists
         Write-HostWarn -Text "The path you selected for you file does not exists."
         Write-HostInfo -Text "Path: $File"
         
         Write-HostError -Text "It is impossibile to continue. The script will be stopped."
         exit
+    }
+    else {
+        Write-HostInfo -Text "$File exists!"
     }
 }
 

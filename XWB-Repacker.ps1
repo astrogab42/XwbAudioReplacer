@@ -124,6 +124,14 @@ $configTable | Format-Table
 $header = "header.bin"
 $Speechxwb = $SpeechxwbOriginal.Split("\")[-1]
 
+# Check existance of files and folders
+Assert-FolderExists -Folder $wavListFolder
+Assert-FolderExists -Folder $XWBToolFolder
+Assert-FileExists -File $SpeechxwbOriginal
+Assert-FolderExists -Folder $gameFolder
+Assert-FolderExists -Folder $audioGameFolder
+Assert-FileExists -File "$gameFolder\$exeGame"
+
 exit
 
 ##### Build xwb file from wav #####
@@ -162,7 +170,7 @@ Copy-Item -Path $Speechxwb -Destination $audioGameFolder # Copy new Speech.xwb t
 ##### Start the game #####
 if ($runGame) {
     Write-HostInfo -Text $gameName" is starting..."
-    Start-Process -FilePath $exeGame -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
+    Start-Process -FilePath $exeGame -WorkingDirectory $gameFolder -Wait
 }
 else {
     Write-HostInfo -Text "You chose not to start $gameName."
