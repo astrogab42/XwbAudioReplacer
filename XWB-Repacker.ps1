@@ -158,6 +158,9 @@ if ($DwVersion -eq 45 -And $DwHeaderVersion -eq 43) {
 elseif ($DwVersion -eq 46 -And $DwHeaderVersion -eq 44) {
     $buildXWB = .\XWBTool4644.exe -o $XwbName $NewWavesPath"\*.wav" -s -f -y
 }
+else {
+    Write-HostError "There is something wrong with your XWBTool"
+}
 
 ##### Change XWB timestamp in XWB header #####
 [GPSTools]::ReplaceBytes($XwbName, $XwbTimestamp, $XwbTimestampByteLength, $XwbTimestampBytePosition)
