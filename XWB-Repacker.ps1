@@ -56,34 +56,32 @@ else { # if the file already exists, show the message and do nothing
 
 # Store current configuration in variables for this script
 $i = 0
-$configTableVal = [string[]]::new((Get-Content $configFile).Length) # initiate the array
+$ConfigTableVal = [string[]]::new((Get-Content $configFile).Length) # initiate the array
 foreach($line in Get-Content $configFile) { # get config from file
-    $configTableVal[$i] = $line
+    $ConfigTableVal[$i] = $line
     $i++
 }
 
-if ($configTableVal -eq "False") {
-    $runGame = $false
+if ($ConfigTableVal -eq "False") {
+    $RunGame = $false
 }
 else {
-    $runGame = $true
+    $RunGame = $true
 }
-$wavListFolder = $configTableVal[1]
-$XWBToolFolder = $configTableVal[2]
-$SpeechxwbOriginal = $configTableVal[3]
-$gameFolder = $configTableVal[4]
-$audioGameFolder = $configTableVal[5]
-$gameName = $configTableVal[6]
-$exeGame = $configTableVal[7]
+$NewWavesPath   =    $ConfigTableVal[1]
+$XwbFilePath    =    $ConfigTableVal[2]
+$GameExePath    =    $ConfigTableVal[3]
+$GameAudioPath  =    $ConfigTableVal[4]
+#$XwbToolVersion =    $ConfigTableVal
 
-$configTableKey = @("runGame","wavListFolder","XWBToolFolder","SpeechxwbOriginal","gameFolder","audioGameFolder","gameName","exeGame")
+$configTableKey = @("RunGame","NewWavesPath","XwbFilePath","GameExePath","GameAudioPath")
 [int]$max = $configTableKey.Count
 $configTableId = 1..$max
-$configTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $configTableVal
+$ConfigTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $ConfigTableVal
 
 # show config to user
 Write-HostInfo -Text "This is your current configuration:"
-$configTable | Format-Table
+$ConfigTable | Format-Table
 
 # edit configuration
 $title   = "" #"$scriptName Configuration"
@@ -97,81 +95,81 @@ do {
 
         $title   = "" #"$scriptName Configuration"
         $msg     = "Choose the ID you want to change"
-        $options = "&Cancel", "&1", "&2", "&3", "&4", "&5", "&6", "&7", "&8"
+        $options = "&Cancel", "&1", "&2", "&3", "&4", "&5"
         $default = 0  # 0=Cancel
 
         do {
             $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
             switch ($response) {
-                1 {$runGame = $configTableVal[0] = Edit-Configuration -ConfigKey "runGame" -ConfigFile $configFile -Index 1} # see custom function
-                2 {$wavListFolder = $configTableVal[1] = Edit-Configuration -ConfigKey "wavListFolder" -ConfigFile $configFile -Index 2}
-                3 {$XWBToolFolder = $configTableVal[2] = Edit-Configuration -ConfigKey "XWBToolFolder" -ConfigFile $configFile -Index 3}
-                4 {$SpeechxwbOriginal = $configTableVal[3] = Edit-Configuration -ConfigKey "SpeechxwbOriginal" -ConfigFile $configFile -Index 4}
-                5 {$gameFolder = $configTableVal[4] = Edit-Configuration -ConfigKey "gameFolder" -ConfigFile $configFile -Index 5}
-                6 {$audioGameFolder = $configTableVal[5] = Edit-Configuration -ConfigKey "audioGameFolder" -ConfigFile $configFile -Index 6}
-                7 {$gameName = $configTableVal[6] = Edit-Configuration -ConfigKey "gameName" -ConfigFile $configFile -Index 7}
-                8 {$exeGame = $configTableVal[7] = Edit-Configuration -ConfigKey "exeGame" -ConfigFile $configFile -Index 8}
+                1 {$RunGame = $ConfigTableVal[0] = Edit-Configuration -ConfigKey "runGame" -ConfigFile $configFile -Index 1} # see custom function
+                2 {$NewWavesPath = $ConfigTableVal[1] = Edit-Configuration -ConfigKey "NewWavesPath" -ConfigFile $configFile -Index 2}
+                3 {$XwbFilePath = $ConfigTableVal[2] = Edit-Configuration -ConfigKey "XwbFilePath" -ConfigFile $configFile -Index 3}
+                4 {$GameExePath = $ConfigTableVal[3] = Edit-Configuration -ConfigKey "GameMasterPath" -ConfigFile $configFile -Index 4}
+                5 {$GameAudioPath = $ConfigTableVal[4] = Edit-Configuration -ConfigKey "GameAudioPath" -ConfigFile $configFile -Index 5}
             }
+            $Counter++
         } until ($response -eq $default)
     }
+
 } until ($response -eq $default)
 
-$configTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $configTableVal
-Write-HostInfo -Text "This is your new configuration:"
-$configTable | Format-Table
+$ConfigTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $ConfigTableVal
+if ($Counter -gt 1) {
+    Write-HostInfo -Text "This is your new configuration:"
+    $ConfigTable | Format-Table
+}
+else {
+    Write-HostInfo -Text "Nothing to change in the configuration"
+}
 
 # other variables initiation
 $header = "header.bin"
-$Speechxwb = $SpeechxwbOriginal.Split("\")[-1]
+$CurrentXwb = $XwbFilePath.Split("\")[-1]
 
 # Check existance of files and folders
-Assert-FolderExists -Folder $wavListFolder
-Assert-FolderExists -Folder $XWBToolFolder
-Assert-FileExists -File $SpeechxwbOriginal
-Assert-FolderExists -Folder $gameFolder
-Assert-FolderExists -Folder $audioGameFolder
-Assert-FileExists -File "$gameFolder\$exeGame"
+Assert-FolderExists -Folder $NewWavesPath
+Assert-FileExists -File $XwbFilePath
+#Assert-FileExists -File $GameExePath # commented for developing and testing purposed. MUST BE ACTIVATED IN PRD
+Assert-FolderExists -Folder $GameAudioPath
 
 exit
 
 ##### Build xwb file from wav #####
-Write-HostInfo -Text "Change directory to XWBTool"
-Set-Location $XWBToolFolder
-Write-HostInfo -Text "Build"$Speechxwb" with XWBTool version 43/45."
-$buildXWB = .\XWBTool4543.exe -o $Speechxwb $wavListFolder"\*.wav" -s -f -y # see XWBTool4543 usage for details
+Write-HostInfo -Text "Build"$CurrentXwb" with XWBTool version 43/45."
+$buildXWB = .\XWBTool4543.exe -o $CurrentXwb $NewWavesPath"\*.wav" -s -f -y # see XWBTool4543 usage for details
 
 ##### Change header in hex #####
 $numberOfBytes = 147
-Write-HostInfo -Text "Get header from original $Speechxwb and write to temporary header file $header."
-Get-Content $SpeechxwbOriginal -AsByteStream -TotalCount $numberOfBytes | Set-Content -Path $header -AsByteStream
-Write-HostInfo -Text "Change header of $Speechxwb."
-[GPSTools]::ReplaceBytes($XWBToolFolder+"\"+$Speechxwb, $XWBToolFolder+"\"+$header, $numberOfBytes)
+Write-HostInfo -Text "Get header from original $CurrentXwb and write to temporary header file $header."
+Get-Content $XwbFilePath -AsByteStream -TotalCount $numberOfBytes | Set-Content -Path $header -AsByteStream
+Write-HostInfo -Text "Change header of $CurrentXwb."
+[GPSTools]::ReplaceBytes($XwbToolPath+"\"+$CurrentXwb, $XwbToolPath+"\"+$header, $numberOfBytes)
 Write-HostInfo -Text "Remove temporary header file."
 Remove-Item $header # work clean
 
 
 ########################################################################## TO BE TESTED
 ##### Move Speech.xwb to MISE folder #####
-if (-not(Test-Path -Path $audioGameFolder"\"$Speechxwb".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
+if (-not(Test-Path -Path $GameAudioPath"\"$CurrentXwb".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
      try {
-         Rename-Item -Path $audioGameFolder"\"$Speechxwb -NewName $Speechxwb".original"
-         Write-HostInfo -Text "File $Speechxwb.original created as copy of the original $Speechxwb."
+         Rename-Item -Path $GameAudioPath"\"$CurrentXwb -NewName $CurrentXwb".original"
+         Write-HostInfo -Text "File $CurrentXwb.original created as copy of the original $CurrentXwb."
      }
      catch {
          throw $_.Exception.Message
      }
  }
  else { # If the file already exists, show the message and do nothing.
-     Write-HostInfo -Text "File $Speechxwb.original NOT created because it already exists."
+     Write-HostInfo -Text "File $CurrentXwb.original NOT created because it already exists."
  }
-Copy-Item -Path $Speechxwb -Destination $audioGameFolder # Copy new Speech.xwb to MISE folder
+Copy-Item -Path $CurrentXwb -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
 #######################################################################################
 
 ##### Start the game #####
-if ($runGame) {
-    Write-HostInfo -Text $gameName" is starting..."
-    Start-Process -FilePath $exeGame -WorkingDirectory $gameFolder -Wait
+if ($RunGame) {
+    Write-HostInfo -Text $GameName" is starting..."
+    Start-Process -FilePath $GameExePath -WorkingDirectory $GameMasterPath -Wait
 }
 else {
-    Write-HostInfo -Text "You chose not to start $gameName."
+    Write-HostInfo -Text "You chose not to start $GameName."
 }

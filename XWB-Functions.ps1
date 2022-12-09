@@ -83,19 +83,14 @@ function Set-Configuration {
     )
 
     # Get configuration
-    $runGame                =       $false; # do you want to run the game at the end of the script? $true/$false
-    $wavListFolder          =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
-    $XWBToolFolder          =       ".\XWB-Extractor"
-    $SpeechxwbOriginal      =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
-    $gameFolder             =       "C:\GOG Games\Monkey Island 1 SE"
-    $audioGameFolder        =       "C:\GOG Games\Monkey Island 1 SE\audio"
-    ######### andrebbe rimosso per pulizia
-    $gameName               =       $gameFolder.Split("\")[-1] # use game path to store game name
-    ######### andrebbe rimosso per pulizia
-    $exeGame                =       "MISE.exe"
+    $RunGame                =       $false; # do you want to run the game at the end of the script? $true/$false
+    $NewWavesPath           =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+    $XwbFilePath            =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
+    $GameExePath            =       "C:\GOG Games\Monkey Island 1 SE\MISE.exe"
+    $GameAudioPath          =       "C:\GOG Games\Monkey Island 1 SE\audio"
     
     # Store configuration to file
-    Add-Content -Path $configFile -Value $runGame, $wavListFolder, $XWBToolFolder, $SpeechxwbOriginal, $gameFolder, $audioGameFolder, $gameName, $exeGame
+    Add-Content -Path $configFile -Value $RunGame, $NewWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath
 }
 
 # edit config file
