@@ -83,14 +83,16 @@ function Set-Configuration {
     )
 
     # Get configuration
-    $RunGame                =       $false; # do you want to run the game at the end of the script? $true/$false
-    $NewWavesPath           =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
+    $RunGame                =       $false; # you want to run the game at the end of the script - $true/$false
+    $NewWavesPath           =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # "Original Folder"
+    $DubbedWavesPath        =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Dubbed-Folder" # "Dubbed Folder"
     $XwbFilePath            =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
     $GameExePath            =       "C:\GOG Games\Monkey Island 1 SE\MISE.exe"
     $GameAudioPath          =       "C:\GOG Games\Monkey Island 1 SE\audio"
+    $DeleteModeWaves        =       $false; # you want to delete the "Repacker Folder" - $true/$false
     
     # Store configuration to file
-    Add-Content -Path $configFile -Value $RunGame, $NewWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath
+    Add-Content -Path $configFile -Value $RunGame, $NewWavesPath, $DubbedWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath, $DeleteModeWaves
 }
 
 # edit config file
@@ -101,7 +103,20 @@ function Edit-Configuration {
         [int16]$Index
     )
 
-    if ($ConfigKey -eq "runGame") { # specific case to match true/false values
+    if ($ConfigKey -eq "RunGame") { # specific case to match true/false values
+        do {
+            $prompt = Read-Host "What is the new value? [True/False]" # prompt user to insert new value from keyboard 
+        } until ($prompt -eq "True" -Or $prompt -eq "False")
+
+        if ($prompt -eq "False") {
+            $output = $false
+        }
+        else {
+            $output = $true
+        }
+        
+    }
+    elseif ($ConfigKey -eq "DeleteModeWaves") { # specific case to match true/false values
         do {
             $prompt = Read-Host "What is the new value? [True/False]" # prompt user to insert new value from keyboard 
         } until ($prompt -eq "True" -Or $prompt -eq "False")
@@ -143,3 +158,5 @@ function Build-ConfigTable {
 
     return $configTable
 }
+
+# in case the user
