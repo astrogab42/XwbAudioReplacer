@@ -122,47 +122,64 @@ else {
     Write-HostInfo -Text "Nothing to change in the configuration"
 }
 
-# other variables initiation
-$header = "header.bin"
-$CurrentXwb = $XwbFilePath.Split("\")[-1]
-
 # Check existance of files and folders
 Assert-FolderExists -Folder $NewWavesPath
 Assert-FileExists -File $XwbFilePath
 #Assert-FileExists -File $GameExePath # commented for developing and testing purposed. MUST BE ACTIVATED IN PRD
 Assert-FolderExists -Folder $GameAudioPath
 
+# Other variables initiation
+$XwbName = $XwbFilePath.Split("\")[-1]
+
 exit
 
+##### Get info from XWB file #####
+# Tool version, aka dwVersion / XACT_CONTENT_VERSION
+$DwVersionBytePosition = 8 # 8th byte, i.e. 8th pair of values (see Bible)
+$DwVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwVersionBytePosition-1]
+Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" # 45 ####################### TO BE CHECKED
+
+# File format, aka dwHeaderVersion
+$DwHeaderVersionBytePosition = 12 # 12th byte, i.e. 12th pair of values (see Bible)
+$DwHeaderVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwVersionBytePosition-1] # 43 ####################### TO BE CHECKED
+Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion"
+
+# Timestamp
+$XwbTimestampBytePosition = [uint32]"0x8c" # byte at position 0x8c (see Bible)
+$XwbTimestampByteLength = 8 # 8 byte (see Bible)
+$XwbTimestamp = (Get-Content $XwbFilePath -AsByteStream)[$XwbTimestampBytePosition..($XwbTimestampBytePosition+$XwbTimestampByteLength-1)]
+Write-HostInfo -Text "Timestamp in original XWB header: $XwbTimestamp"
+
 ##### Build xwb file from wav #####
-Write-HostInfo -Text "Build"$CurrentXwb" with XWBTool version 43/45."
-$buildXWB = .\XWBTool4543.exe -o $CurrentXwb $NewWavesPath"\*.wav" -s -f -y # see XWBTool4543 usage for details
+Write-HostInfo -Text "Build $XwbName with XWBTool version $DwVersion/$DwHeaderVersion."
+if ($DwVersion -eq 45 -And $DwHeaderVersion -eq 43) {
+    $buildXWB = .\XWBTool4543.exe -o $XwbName $NewWavesPath"\*.wav" -s -f -y # see XWBTool usage on Bible for details
+}
+elseif ($DwVersion -eq 46 -And $DwHeaderVersion -eq 44) {
+    $buildXWB = .\XWBTool4644.exe -o $XwbName $NewWavesPath"\*.wav" -s -f -y
+}
+else {
+    Write-HostError "There is something wrong with your XWBTool"
+}
 
-##### Change header in hex #####
-$numberOfBytes = 147
-Write-HostInfo -Text "Get header from original $CurrentXwb and write to temporary header file $header."
-Get-Content $XwbFilePath -AsByteStream -TotalCount $numberOfBytes | Set-Content -Path $header -AsByteStream
-Write-HostInfo -Text "Change header of $CurrentXwb."
-[GPSTools]::ReplaceBytes($XwbToolPath+"\"+$CurrentXwb, $XwbToolPath+"\"+$header, $numberOfBytes)
-Write-HostInfo -Text "Remove temporary header file."
-Remove-Item $header # work clean
-
+##### Change XWB timestamp in XWB header #####
+[GPSTools]::ReplaceBytes($XwbName, $XwbTimestamp, $XwbTimestampByteLength, $XwbTimestampBytePosition)
 
 ########################################################################## TO BE TESTED
 ##### Move Speech.xwb to MISE folder #####
-if (-not(Test-Path -Path $GameAudioPath"\"$CurrentXwb".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
+if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
      try {
-         Rename-Item -Path $GameAudioPath"\"$CurrentXwb -NewName $CurrentXwb".original"
-         Write-HostInfo -Text "File $CurrentXwb.original created as copy of the original $CurrentXwb."
+         Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
+         Write-HostInfo -Text "File $XwbName.original created as copy of the original $XwbName."
      }
      catch {
          throw $_.Exception.Message
      }
  }
  else { # If the file already exists, show the message and do nothing.
-     Write-HostInfo -Text "File $CurrentXwb.original NOT created because it already exists."
+     Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
  }
-Copy-Item -Path $CurrentXwb -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
+Copy-Item -Path $XwbName -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
 #######################################################################################
 
 ##### Start the game #####
