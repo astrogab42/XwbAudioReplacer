@@ -185,8 +185,15 @@ ForEach-Object ($DubbedFile in $DubbedFileList) {
         }
         else {
             $LengthDelta = $DubbedFile.Length - (Get-ChildItem -Filter "$ID*").Length # Size difference in byte
-            Write-HostError "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta"
+            Write-HostWarn "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta"
+            Write-HostInfo "The script will continue"
+            continue
         }
+    }
+    else {
+        Write-HostWarn "The dubbed file $($DubbedFile.Name) has a wrong name"
+        Write-HostInfo "The script will continue"
+        continue
     }
 }
 ########################################################################## TO BE TESTED
