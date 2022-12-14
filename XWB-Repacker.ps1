@@ -175,9 +175,17 @@ robocopy /xc /xn /xo $NewWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eX
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $RepackerFileList = Get-ChildItem $RepackerWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
 ForEach-Object ($DubbedFile in $DubbedFileList) {
-    if ((($RepackerFileList).Name).Contains(($DubbedFile).Name)) { # The dubbed file exists among the original ones
-        if(($DubbedFile).Length) {
-            asdf
+    if (-not($RepackerFileList.Name.Contains($DubbedFile.Name))) { # The dubbed file does not exist among the original ones
+        
+        ####################### MANCA VALIDAZIONE SUL FILENAME DEL FILE DOPPIATO: DEVE ESSERE NEL FORMATO GIUSTO ###########################################
+        
+        $ID=[uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) and force it to be int32
+        if($DubbedFile.Length -le (Get-ChildItem -Filter "$ID*").Length) { # Use the ID to get the corresponding file in Repacker folder and compare file size
+            robocopy ($DubbedWavesPath+"\"+$DubbedFile.Name) $RepackerWavesPath # Perform the copy
+        }
+        else {
+            $LengthDelta = $DubbedFile.Length - (Get-ChildItem -Filter "$ID*").Length # Size difference in byte
+            Write-HostError "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta"
         }
     }
 }
