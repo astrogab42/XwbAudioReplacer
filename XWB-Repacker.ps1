@@ -174,7 +174,7 @@ robocopy /xc /xn /xo $NewWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eX
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $RepackerFileList = Get-ChildItem $RepackerWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
-ForEach-Object ($DubbedFile in $DubbedFileList) {
+ForEach-Object ($DubbedFile -in $DubbedFileList) {
     if (-not($RepackerFileList.Name.Contains($DubbedFile.Name))) { # The dubbed file does not exist among the original ones
         
         ####################### MANCA VALIDAZIONE SUL FILENAME DEL FILE DOPPIATO: DEVE ESSERE NEL FORMATO GIUSTO ###########################################
