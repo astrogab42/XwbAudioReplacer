@@ -150,8 +150,6 @@ Assert-FolderExists -Folder $GameAudioPath
 # Other variables initiation
 $XwbName = $XwbFilePath.Split("\")[-1]
 
-exit
-
 ##### Get info from XWB file #####
 # Tool version, aka dwVersion / XACT_CONTENT_VERSION
 $DwVersionBytePosition = 8 # 8th byte, i.e. 8th pair of values (see Bible)
