@@ -158,7 +158,7 @@ Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" # 45 #########
 
 # File format, aka dwHeaderVersion
 $DwHeaderVersionBytePosition = 12 # 12th byte, i.e. 12th pair of values (see Bible)
-$DwHeaderVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwVersionBytePosition-1] # 43 ####################### TO BE CHECKED
+$DwHeaderVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwHeaderVersionBytePosition-1] # 43 ####################### TO BE CHECKED
 Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion"
 
 # Timestamp
