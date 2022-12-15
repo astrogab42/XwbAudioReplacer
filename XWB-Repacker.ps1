@@ -36,6 +36,25 @@ $scriptName = "XWB-Repacker" # name of this script
 ##########################
 $configFile = ".\xwbrepacker.config" # config file
 
+# get and store configuration in config file
+function Set-Configuration {
+    param (
+        $ConfigFile
+    )
+
+    # Get configuration
+    $RunGame                =       $false; # you want to run the game at the end of the script - $true/$false
+    $NewWavesPath           =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # "Original Folder"
+    $DubbedWavesPath        =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Dubbed-Folder" # "Dubbed Folder"
+    $XwbFilePath            =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
+    $GameExePath            =       "C:\GOG Games\Monkey Island 1 SE\MISE.exe"
+    $GameAudioPath          =       "C:\GOG Games\Monkey Island 1 SE\audio"
+    $DeleteModeWaves        =       $false; # you want to delete the "Repacker Folder" - $true/$false
+    
+    # Store configuration to file
+    Add-Content -Path $configFile -Value $RunGame, $NewWavesPath, $DubbedWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath, $DeleteModeWaves
+}
+
 # Check on config file existance
 if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not exist, create it.
     try {
