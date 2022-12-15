@@ -1,3 +1,5 @@
+Write-Host "XWB-Repacker STARTED" -ForegroundColor blue
+
 # Include external functions
 . ".\XWB-Functions.ps1"
 
