@@ -121,7 +121,7 @@ function Edit-Configuration {
     return $output
 }
 
-# build config table
+# build config table to be shown the user on screen
 function Build-ConfigTable {
     param (
         [int16[]]$TableId,
