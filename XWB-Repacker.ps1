@@ -31,7 +31,9 @@ public class GPSTools
 ##########################
 ##### Initialization #####
 ##########################
-$scriptName = "XWB-Repacker" # name of this script
+$ScriptName = "XWB-Repacker" # name of this script
+$CurrentTimestamp = Get-Date -Format "yyyyMMddHHmmss"
+$header = "header.bin" 
 
 ##########################
 ##### Configuration ######
@@ -89,7 +91,7 @@ $DubbedWavesPath        =    $ConfigTableVal[2]
 $XwbFilePath            =    $ConfigTableVal[3]
 $GameExePath            =    $ConfigTableVal[4]
 $GameAudioPath          =    $ConfigTableVal[5]
-if ($ConfigTableVal[6] -eq "False") { $DubbedWavesPath = $false } else { $DubbedWavesPath = $true }
+if ($ConfigTableVal[6] -eq "False") { $DeleteModeWaves = $false } else { $DeleteModeWaves = $true }
 
 $configTableKey = @("RunGame","OriginalWavesPath", "DubbedWavesPath","XwbFilePath","GameExePath","GameAudioPath", "DeleteModeWaves")
 [int]$max = $configTableKey.Count
@@ -143,8 +145,9 @@ else {
 
 # Check existance of files and folders
 Assert-FolderExists -Folder $OriginalWavesPath
+Assert-FolderExists -Folder $DubbedWavesPath
 Assert-FileExists -File $XwbFilePath
-#Assert-FileExists -File $GameExePath # commented for developing and testing purposed. MUST BE ACTIVATED IN PRD
+Assert-FileExists -File $GameExePath # commented for developing and testing purposed. MUST BE ACTIVATED IN PRD
 Assert-FolderExists -Folder $GameAudioPath
 
 # Other variables initiation
@@ -152,7 +155,7 @@ $XwbName = $XwbFilePath.Split("\")[-1]
 
 ##### Get info from XWB file #####
 $ByteStreamLimit = 150 # to speed up the process
-$XwbHeader = (Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit)
+$XwbHeader = Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit
 # Tool version, aka dwVersion / XACT_CONTENT_VERSION
 $DwVersionBytePosition = [uint32]"0x08" # byte at position 0x08 (see Bible)
 $DwVersion = $XwbHeader[$DwVersionBytePosition]
@@ -183,43 +186,46 @@ Write-HostInfo -Text "Repacker Folder: $RepackerWavesPath. This folder contains 
 # Delete Mode
 if ($DeleteModeWaves) {
     Write-HostInfo -Text "Deleting Repacker folder: $RepackerWavesPath..."
-    Remove-Item $RepackerWavesPath -Recurse
+    Remove-Item $RepackerWavesPath -Recurse -Force
 }
 
 # Copy of original WAV files in Repacker folder
 Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath..."
-robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
+$RepackerFolderCopy = robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
 
-########################################################################## TO BE TESTED
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $OriginalWavesList = Get-ChildItem $OriginalWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
-ForEach-Object ($DubbedFile -in $DubbedFileList) {
+$DubbedFilesSizeError = $CurrentTimestamp+"_DubbedFilesSizeError.txt"
+$DubbedFilesNameError = $CurrentTimestamp+"_DubbedFilesNameError.txt"
+ForEach ($DubbedFile in $DubbedFileList) {
     if ($OriginalWavesList.Name.Contains($DubbedFile.Name)) { # The dubbed file exists among the original ones
         
         $ID=[uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) and force it to be int32
         if($DubbedFile.Length -le $OriginalWavesList[$ID-1].Length) { # Use the ID to get the corresponding file in Repacker folder and compare file size
-            robocopy ($DubbedWavesPath+"\"+$DubbedFile.Name) $RepackerWavesPath # Perform the copy
+            robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy
         }
         else {
             $LengthDelta = $DubbedFile.Length - $OriginalWavesList[$ID-1].Length # Size difference in byte
-            Write-HostWarn "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta."
+            Write-HostWarn "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta byte."
+            Write-HostInfo "Saving to file $($DubbedFilesSizeError)"
+            $DubbedFile.Name >> $DubbedFilesSizeError
             Write-HostInfo "The script will continue"
             continue
         }
     }
     else {
         Write-HostWarn "The dubbed file $($DubbedFile.Name) has a wrong name."
+        Write-HostInfo "Saving to file $($DubbedFilesNameError)"
+        $DubbedFile.Name >> $DubbedFilesNameError
         Write-HostInfo "The script will continue"
         continue
     }
 }
-#################### AGGIUNGERE SALVATAGGIO LISTA SBAGLIATI RESOCONTO IN FILE ###############
-########################################################################## TO BE TESTED
 
 ##### Build xwb file from wav #####
-Write-HostInfo -Text "Build $XwbName with XWBTool version $DwVersion/$DwHeaderVersion."
+Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
 if ($DwHeaderVersion -eq 45 -And $DwVersion -eq 43) {
     $buildXWB = .\XWBTool4543.exe -o $XwbName $RepackerWavesPath"\*.wav" -s -f -y # see XWBTool usage on Bible for details
 }
@@ -231,30 +237,34 @@ else {
 }
 
 ##### Update XWB Header #####
-[GPSTools]::ReplaceBytes($XwbName, $XwbHeader, $ByteStreamLimit)
+$XwbHeader | Set-Content -Path $header -AsByteStream # Save header to temporary binary file
+[GPSTools]::ReplaceBytes($XwbName, $header, $ByteStreamLimit)
 <#
 # Specific change of "timestamp" in header - DEPRECATED
+$XwbTimestamp | Set-Content -Path $header -AsByteStream # Save header to temporary binary file
 [GPSTools]::ReplaceBytes($XwbName, $XwbTimestamp, $XwbTimestampByteLength, $XwbTimestampBytePosition)
 #>
+Remove-Item $header # Delete temporary binary file
 
-########################################################################## TO BE TESTED
+
 ##### Move Speech.xwb to MISE folder #####
 if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) { # if the file does not exist, create a copy to *.original
-     try {
-         Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
-         Write-HostInfo -Text "File $XwbName.original created as copy of the original $XwbName."
-     }
-     catch {
-         throw $_.Exception.Message
-     }
- }
- else { # If the file already exists, show the message and do nothing.
-     Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
- }
+    try {
+        Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
+        Write-HostInfo -Text "File $XwbName (assumed to be The Original) renamed in $XwbName.original."
+    }
+    catch {
+        throw $_.Exception.Message
+    }
+}
+else { # If the file already exists, show the message and do nothing.
+    Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
+}
 Copy-Item -Path $XwbName -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
-#######################################################################################
+
 
 ##### Start the game #####
+$GameName = $GameExePath.Split("\")[-1]
 if ($RunGame) {
     Write-HostInfo -Text $GameName" is starting..."
     Start-Process -FilePath $GameExePath -WorkingDirectory $GameMasterPath -Wait
