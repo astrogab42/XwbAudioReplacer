@@ -31,7 +31,6 @@ public class GPSTools
 ##########################
 ##### Initialization #####
 ##########################
-$ScriptName = "XWB-Repacker" # name of this script
 $CurrentTimestamp = Get-Date -Format "yyyyMMddHHmmss"
 $header = "header.bin" 
 

@@ -1,11 +1,14 @@
-﻿##### INITIALIZATION #####
-# Include external functions
-. "..\XWB-Functions.ps1"
+﻿Write-Host "XWB-Extractor STARTED" -ForegroundColor blue
 
+##### INITIALIZATION #####
+# Include external functions
+. ".\XWB-Functions.ps1"
+
+# Configuration
 $wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 Assert-FolderExists -Folder $wavOutputFolder
 
-$xwbInputFile = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb" # Path to XWB file
+$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio" # Path to XWB file
 Assert-FileExists -File $xwbInputFile
 
 # extract wav from xwb
