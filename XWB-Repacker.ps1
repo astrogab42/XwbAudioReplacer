@@ -50,7 +50,7 @@ function Set-Configuration {
     $DubbedWavesPath        =       "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Dubbed-Folder" # "Dubbed Folder"
     $XwbFilePath            =       "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
     $GameExePath            =       "C:\GOG Games\Monkey Island 1 SE\MISE.exe"
-    $GameAudioPath          =       "C:\GOG Games\Monkey Island 1 SE\audio"
+    $GameAudioPath          =       "C:\GOG Games\Monkey Island 1 SE\audio" ######## SI PUO PRENDERE DA $XwbFilePath
     $DeleteModeWaves        =       $false; # you want to delete the "Repacker Folder" - $true/$false
     
     # Store configuration to file
@@ -84,11 +84,11 @@ foreach($line in Get-Content $configFile) { # get config from file
 }
 
 if ($ConfigTableVal[0] -eq "False") { $RunGame = $false } else { $RunGame = $true }
-$OriginalWavesPath       =    $ConfigTableVal[1]
-$DubbedWavesPath    =    $ConfigTableVal[2]
-$XwbFilePath        =    $ConfigTableVal[3]
-$GameExePath        =    $ConfigTableVal[4]
-$GameAudioPath      =    $ConfigTableVal[5]
+$OriginalWavesPath      =    $ConfigTableVal[1]
+$DubbedWavesPath        =    $ConfigTableVal[2]
+$XwbFilePath            =    $ConfigTableVal[3]
+$GameExePath            =    $ConfigTableVal[4]
+$GameAudioPath          =    $ConfigTableVal[5]
 if ($ConfigTableVal[6] -eq "False") { $DubbedWavesPath = $false } else { $DubbedWavesPath = $true }
 
 $configTableKey = @("RunGame","OriginalWavesPath", "DubbedWavesPath","XwbFilePath","GameExePath","GameAudioPath", "DeleteModeWaves")
@@ -151,20 +151,22 @@ Assert-FolderExists -Folder $GameAudioPath
 $XwbName = $XwbFilePath.Split("\")[-1]
 
 ##### Get info from XWB file #####
+$ByteStreamLimit = 150 # to speed up the process
+$XwbHeader = (Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit)
 # Tool version, aka dwVersion / XACT_CONTENT_VERSION
-$DwVersionBytePosition = 8 # 8th byte, i.e. 8th pair of values (see Bible)
-$DwVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwVersionBytePosition-1]
-Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" # 45 ####################### TO BE CHECKED
+$DwVersionBytePosition = [uint32]"0x08" # byte at position 0x08 (see Bible)
+$DwVersion = $XwbHeader[$DwVersionBytePosition]
+Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion"
 
 # File format, aka dwHeaderVersion
-$DwHeaderVersionBytePosition = 12 # 12th byte, i.e. 12th pair of values (see Bible)
-$DwHeaderVersion = (Get-Content $XwbFilePath -AsByteStream)[$DwHeaderVersionBytePosition-1] # 43 ####################### TO BE CHECKED
+$DwHeaderVersionBytePosition = [uint32]"0x04" # byte at position 0x04 (see Bible)
+$DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition]
 Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion"
 
 # Timestamp
 $XwbTimestampBytePosition = [uint32]"0x8c" # byte at position 0x8c (see Bible)
 $XwbTimestampByteLength = 8 # 8 byte (see Bible)
-$XwbTimestamp = (Get-Content $XwbFilePath -AsByteStream)[$XwbTimestampBytePosition..($XwbTimestampBytePosition+$XwbTimestampByteLength-1)]
+$XwbTimestamp = $XwbHeader[$XwbTimestampBytePosition..($XwbTimestampBytePosition+$XwbTimestampByteLength-1)]
 Write-HostInfo -Text "Timestamp in original XWB header: $XwbTimestamp"
 
 ##### Preparation for xwb file built #####
@@ -218,18 +220,22 @@ ForEach-Object ($DubbedFile -in $DubbedFileList) {
 
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Build $XwbName with XWBTool version $DwVersion/$DwHeaderVersion."
-if ($DwVersion -eq 45 -And $DwHeaderVersion -eq 43) {
+if ($DwHeaderVersion -eq 45 -And $DwVersion -eq 43) {
     $buildXWB = .\XWBTool4543.exe -o $XwbName $RepackerWavesPath"\*.wav" -s -f -y # see XWBTool usage on Bible for details
 }
-elseif ($DwVersion -eq 46 -And $DwHeaderVersion -eq 44) {
+elseif ($DwHeaderVersion -eq 46 -And $DwVersion -eq 44) {
     $buildXWB = .\XWBTool4644.exe -o $XwbName $RepackerWavesPath"\*.wav" -s -f -y
 }
 else {
     Write-HostError "XWB file version is not accepted."
 }
 
-##### Change XWB timestamp in XWB header #####
+##### Update XWB Header #####
+[GPSTools]::ReplaceBytes($XwbName, $XwbHeader, $ByteStreamLimit)
+<#
+# Specific change of "timestamp" in header - DEPRECATED
 [GPSTools]::ReplaceBytes($XwbName, $XwbTimestamp, $XwbTimestampByteLength, $XwbTimestampBytePosition)
+#>
 
 ########################################################################## TO BE TESTED
 ##### Move Speech.xwb to MISE folder #####
