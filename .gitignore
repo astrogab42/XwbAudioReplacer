@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 xwbrepacker.config
+RepackerFolder
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)

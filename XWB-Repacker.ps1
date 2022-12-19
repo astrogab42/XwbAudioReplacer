@@ -63,7 +63,6 @@ if (-not(Test-Path -Path $configFile -PathType Leaf)) { # if the file does not e
     try {
         Write-HostInfo -Text "The config file $configFile does not exists. Creating..."
         $null = New-Item -ItemType File -Path $configFile -Force -ErrorAction Stop
-        Write-HostInfo -Text "The config file $configFile has been created."
         $initWindowsPrompt = $true
 
         Set-Configuration -ConfigFile $configFile # get and store configuration in config file
@@ -259,14 +258,14 @@ if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) {
 else { # If the file already exists, show the message and do nothing.
     Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
 }
-Copy-Item -Path $XwbName -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
+Move-Item -Path $XwbName -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
 
 
 ##### Start the game #####
 $GameName = $GameExePath.Split("\")[-1]
 if ($RunGame) {
     Write-HostInfo -Text $GameName" is starting..."
-    Start-Process -FilePath $GameExePath -WorkingDirectory $GameMasterPath -Wait
+    Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
 }
 else {
     Write-HostInfo -Text "You chose not to start $GameName."

@@ -12,14 +12,17 @@ $xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB
 Assert-FileExists -File $xwbInputFile
 
 # extract wav from xwb
+Write-HostInfo "Extracting WAV files from XWB file"
 $extractWav = .\towav.exe $xwbInputFile 
+Write-HostInfo "Moving WAV files to destination folder $wavOutputFolder"
 Move-Item *.wav $wavOutputFolder
 
 # Rename files
+Write-HostInfo "Renaming WAV files"
 $fileList = Get-ChildItem $wavOutputFolder -Filter *.wav
 ForEach ($thisFile in $fileList.Name) {
     $number = $thisFile.Split(" ")[0]
-    $wavName = $thisFile.Split(" ")[1] # Assumption: towav.exe output file name is as "<number> filename.wav"
+    $wavName = $thisFile.Split(" ")[-1] # Assumption: towav.exe output file name is as "<number> filename.wav"
     
     if ($thisFile.Split(" ").Length -gt 1) { #If there are no spaces in file name (file name already renamed)
         if ($number.ToString().Length -eq 1) {
