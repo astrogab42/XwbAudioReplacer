@@ -141,6 +141,14 @@ else {
     Write-HostInfo -Text "Nothing to change in the configuration"
 }
 
+
+# Manage and remove quotes in paths
+$OriginalWavesPath = $OriginalWavesPath.Replace("`"","")
+$DubbedWavesPath = $DubbedWavesPath.Replace("`"","")
+$XwbFilePath = $XwbFilePath.Replace("`"","")
+$GameExePath = $GameExePath.Replace("`"","")
+$GameAudioPath = $GameAudioPath.Replace("`"","")
+
 # Check existance of files and folders
 Assert-FolderExists -Folder $OriginalWavesPath
 Assert-FolderExists -Folder $DubbedWavesPath
