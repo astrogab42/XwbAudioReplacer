@@ -212,7 +212,7 @@ ForEach ($DubbedFile in $DubbedFileList) {
         
         $ID=[uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) and force it to be int32
         if($DubbedFile.Length -le $OriginalWavesList[$ID-1].Length) { # Use the ID to get the corresponding file in Repacker folder and compare file size
-            if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID-1].LastWriteTime)) { # files do not have the same LastWriteDate (optimization check)
+            if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID-1].LastWriteTime)) { # files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
                 Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerWavesPath..."
                 robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy
             }
