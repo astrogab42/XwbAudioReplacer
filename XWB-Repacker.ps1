@@ -203,19 +203,31 @@ $RepackerFolderCopy = robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $OriginalWavesList = Get-ChildItem $OriginalWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
+$RepackerWavesList = Get-ChildItem $RepackerWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
 $DubbedFilesSizeError = $CurrentTimestamp+"_DubbedFilesSizeError.txt"
 $DubbedFilesNameError = $CurrentTimestamp+"_DubbedFilesNameError.txt"
+$DubbedFilesDateError = $CurrentTimestamp+"_DubbedFilesDateError.txt"
 ForEach ($DubbedFile in $DubbedFileList) {
     if ($OriginalWavesList.Name.Contains($DubbedFile.Name)) { # The dubbed file exists among the original ones
         
         $ID=[uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) and force it to be int32
         if($DubbedFile.Length -le $OriginalWavesList[$ID-1].Length) { # Use the ID to get the corresponding file in Repacker folder and compare file size
-            robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy
+            if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID-1].LastWriteTime)) { # files do not have the same LastWriteDate (optimization check)
+                Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerWavesPath..."
+                robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy
+            }
+            else {
+                Write-HostWarn -Text "File dubbed file $DubbedFile already copied."
+                Write-HostInfo "Storing log to file $DubbedFilesDateError..."
+                $DubbedFile.Name >> $DubbedFilesDateError
+                Write-HostInfo "The script will continue"
+                continue
+            }
         }
         else {
             $LengthDelta = $DubbedFile.Length - $OriginalWavesList[$ID-1].Length # Size difference in byte
             Write-HostWarn "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta byte."
-            Write-HostInfo "Saving to file $($DubbedFilesSizeError)"
+            Write-HostInfo "Storing log to file $DubbedFilesSizeError..."
             $DubbedFile.Name >> $DubbedFilesSizeError
             Write-HostInfo "The script will continue"
             continue
@@ -223,12 +235,16 @@ ForEach ($DubbedFile in $DubbedFileList) {
     }
     else {
         Write-HostWarn "The dubbed file $($DubbedFile.Name) has a wrong name."
-        Write-HostInfo "Saving to file $($DubbedFilesNameError)"
+        Write-HostInfo "Storing log to file $DubbedFilesNameError..."
         $DubbedFile.Name >> $DubbedFilesNameError
         Write-HostInfo "The script will continue"
         continue
     }
 }
+
+Write-HostInfo -Text "Check $DubbedFilesSizeError for files with wrong size.
+`tCheck $DubbedFilesNameError for files with wrong name.
+`tCheck $DubbedFilesDateError for files already copied, with the same last-write date."
 
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
