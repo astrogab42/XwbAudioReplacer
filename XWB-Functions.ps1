@@ -111,7 +111,7 @@ function Edit-Configuration {
         
     }
     else {
-        $output = Read-Host "Please, enter the new value" # prompt user to insert new value from keyboard
+        $output = (Read-Host "Please, enter the new value").Replace("`"","") # prompt user to insert new value from keyboard
     }
 
     $content = Get-Content $ConfigFile # Get file content and store it into variable

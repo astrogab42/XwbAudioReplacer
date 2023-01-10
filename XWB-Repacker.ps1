@@ -79,7 +79,7 @@ else { # if the file already exists, show the message and do nothing
 $i = 0
 $ConfigTableVal = [string[]]::new((Get-Content $configFile).Length) # initiate the array
 foreach($line in Get-Content $configFile) { # get config from file
-    $ConfigTableVal[$i] = $line
+    $ConfigTableVal[$i] = $line.Replace("`"","")
     $i++
 }
 
@@ -119,11 +119,11 @@ do {
             $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
             switch ($response) {
                 1 {$RunGame = $ConfigTableVal[0] = Edit-Configuration -ConfigKey "RunGame" -ConfigFile $configFile -Index 1} # see custom function
-                2 {$OriginalWavesPath = $ConfigTableVal[1] = Edit-Configuration -ConfigKey "OriginalWavesPath" -ConfigFile $configFile -Index 2}
-                3 {$DubbedWavesPath = $ConfigTableVal[2] = Edit-Configuration -ConfigKey "DubbedWavesPath" -ConfigFile $configFile -Index 3}
-                4 {$XwbFilePath = $ConfigTableVal[3] = Edit-Configuration -ConfigKey "XwbFilePath" -ConfigFile $configFile -Index 4}
-                5 {$GameExePath = $ConfigTableVal[4] = Edit-Configuration -ConfigKey "GameMasterPath" -ConfigFile $configFile -Index 5}
-                6 {$GameAudioPath = $ConfigTableVal[5] = Edit-Configuration -ConfigKey "GameAudioPath" -ConfigFile $configFile -Index 6}
+                2 {$OriginalWavesPath = $ConfigTableVal[1] = (Edit-Configuration -ConfigKey "OriginalWavesPath" -ConfigFile $configFile -Index 2).Replace("`"","")}
+                3 {$DubbedWavesPath = $ConfigTableVal[2] = (Edit-Configuration -ConfigKey "DubbedWavesPath" -ConfigFile $configFile -Index 3).Replace("`"","")}
+                4 {$XwbFilePath = $ConfigTableVal[3] = (Edit-Configuration -ConfigKey "XwbFilePath" -ConfigFile $configFile -Index 4).Replace("`"","")}
+                5 {$GameExePath = $ConfigTableVal[4] = (Edit-Configuration -ConfigKey "GameMasterPath" -ConfigFile $configFile -Index 5).Replace("`"","")}
+                6 {$GameAudioPath = $ConfigTableVal[5] =( Edit-Configuration -ConfigKey "GameAudioPath" -ConfigFile $configFile -Index 6).Replace("`"","")}
                 7 {$DeleteModeWaves = $ConfigTableVal[6] = Edit-Configuration -ConfigKey "DeleteModeWaves" -ConfigFile $configFile -Index 7}
             }
             $Counter++
