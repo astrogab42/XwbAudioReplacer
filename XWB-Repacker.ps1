@@ -286,7 +286,7 @@ if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) {
 else { # If the file already exists, show the message and do nothing.
     Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
 }
-Move-Item -Path $XwbName -Destination $GameAudioPath # Copy new Speech.xwb to MISE folder
+Move-Item -Path $XwbName -Destination $GameAudioPath -Force # Copy new Speech.xwb to MISE folder
 
 
 ##### Start the game #####
