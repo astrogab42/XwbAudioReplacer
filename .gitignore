@@ -11,6 +11,8 @@
 *.sln.docstates
 xwbrepacker.config
 RepackerFolder
+*.xwb
+DubbedFilesError-*.txt
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
