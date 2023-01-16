@@ -262,9 +262,17 @@ ForEach ($DubbedFile in $DubbedFileList) {
 $DubbedFilesSizeErrorFinal = "DubbedFilesError-Size.txt"
 $DubbedFilesNameErrorFinal = "DubbedFilesError-Name.txt"
 $DubbedFilesDateErrorFinal = "DubbedFilesError-Date.txt"
-Get-Content $DubbedFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
-Get-Content $DubbedFilesNameError | Sort-Object | Get-Unique > $DubbedFilesNameErrorFinal
-Get-Content $DubbedFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
+
+# If tmp file exists, sort by name and make the list disting (unique)
+if (Test-Path -Path $DubbedFilesSizeError) {
+    Get-Content $DubbedFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
+}
+if (Test-Path -Path $DubbedFilesNameError) {
+    Get-Content $DubbedFilesNameError | Sort-Object | Get-Unique > $DubbedFilesNameErrorFinal
+}
+if (Test-Path -Path $DubbedFilesDateError) {
+    Get-Content $DubbedFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
+}
 
 Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size.
 `tCheck $DubbedFilesNameErrorFinal for files with wrong name.
@@ -272,14 +280,16 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
-if ($DwHeaderVersion -eq 45 -And $DwVersion -eq 43) {
-    $buildXWB = .\XWBTool4543.exe -o $XwbName $RepackerWavesPath"\*.wav" -s -f -y # see XWBTool usage on Bible for details
-}
-elseif ($DwHeaderVersion -eq 46 -And $DwVersion -eq 44) {
-    $buildXWB = .\XWBTool4644.exe -o $XwbName $RepackerWavesPath"\*.wav" -s -f -y
-}
-else {
-    Write-HostError "XWB file version is not accepted."
+$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
+$buildXWB = .\XWBTool4543.exe -o $XwbName -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for detail$XwbToolOutputLogHeadLinesNumber = 3 # how many lines at the beginning of the output in XwbTool log
+$XwbToolOutputLogTailLinesNumber = 1 # how many lines at the end of the output in XwbTool log
+$NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
+$NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
+if ($NumberOfFileElaboratedByXwbTool -lt $NumberOfFilesInRepackerFolder) {
+    # in case we have less files elaborated by XwbTool w.r.t. number of wave files in Repacker Folder
+    Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Repacker Folder contains $NumberOfFilesInRepackerFolder files!"
+    Write-HostError "Fatal Error! Exiting..."
+    exit
 }
 
 ##### Update XWB Header #####
