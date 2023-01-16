@@ -281,7 +281,6 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
 $buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
-$buildXWB = .\XWBTool4543.exe -o $XwbName -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for detail$XwbToolOutputLogHeadLinesNumber = 3 # how many lines at the beginning of the output in XwbTool log
 $XwbToolOutputLogTailLinesNumber = 1 # how many lines at the end of the output in XwbTool log
 $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
 $NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
