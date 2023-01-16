@@ -205,7 +205,7 @@ if ($DeleteModeWaves) {
 }
 
 # Copy of original WAV files in Repacker folder
-Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath..."
+Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath with Robocopy..."
 $RepackerFolderCopy = robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
 
