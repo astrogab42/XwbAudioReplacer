@@ -161,7 +161,27 @@ Assert-FolderExists -Folder $GameAudioPath
 
 # Other variables initiation
 $XwbName = $XwbFilePath.Split("\")[-1]
+$GameName = $GameExePath.Split("\")[-1]
 
+# Check if the game is running
+if ($GameName -match '\.exe$') {
+    # Path to the game exe is really an "*.exe"
+    $GameProcess = Get-Process -Name ($GameName.Split('.exe')[-2]) -ErrorAction SilentlyContinue
+    if ($GameProcess) {
+        # if the game is running, close it
+        Write-HostWarn -Text "The is a process $GameName in background. Killing process..."
+        $GameProcess | Stop-Process -Force
+    }
+}
+else {
+    Write-HostError -Text "The file you selected as game exe exists, but it is not an exe file! Please verify."
+    Write-HostError "Fatal Error! Exiting..."
+    exit
+}
+
+##########################
+######## XWB info ########
+##########################
 ##### Get info from XWB file #####
 $ByteStreamLimit = 150 # to speed up the process
 $XwbHeader = Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit
@@ -208,7 +228,9 @@ if ($DeleteModeWaves) {
 Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath with Robocopy..."
 $RepackerFolderCopy = robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
-
+##########################
+######## Dubbing #########
+##########################
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $OriginalWavesList = Get-ChildItem $OriginalWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
@@ -278,6 +300,9 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 `tCheck $DubbedFilesNameErrorFinal for files with wrong name.
 `tCheck $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
 
+##########################
+###### Build new XWB #####
+##########################
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
 $buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
@@ -301,7 +326,9 @@ $XwbTimestamp | Set-Content -Path $header -AsByteStream # Save header to tempora
 #>
 Remove-Item $header # Delete temporary binary file
 
-
+##########################
+######### Outtro #########
+##########################
 ##### Move Speech.xwb to MISE folder #####
 if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) {
     # if the file does not exist, create a copy to *.original
@@ -321,7 +348,6 @@ Move-Item -Path $XwbName -Destination $GameAudioPath -Force # Copy new Speech.xw
 
 
 ##### Start the game #####
-$GameName = $GameExePath.Split("\")[-1]
 if ($RunGame) {
     Write-HostInfo -Text $GameName" is starting..."
     Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
