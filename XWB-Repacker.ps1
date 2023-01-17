@@ -32,12 +32,12 @@ public class GPSTools
 ##### Initialization #####
 ##########################
 $CurrentTimestamp = Get-Date -Format "yyyyMMddHHmmss"
-$header = "header.bin" 
+$Header = "header.bin"
 
 ##########################
 ##### Configuration ######
 ##########################
-$configFile = ".\xwbrepacker.config" # config file
+$ConfigFile = ".\xwbrepacker.config" # config file
 
 # get and store configuration in config file
 function Set-Configuration {
@@ -46,42 +46,37 @@ function Set-Configuration {
     )
 
     # Get configuration
-    $RunGame = $false; # you want to run the game at the end of the script - $true/$false
+    $RunGame = $false; # You want to run the game at the end of the script - $true/$false
     $OriginalWavesPath = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # "Original Folder"
     $DubbedWavesPath = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Dubbed-Folder" # "Dubbed Folder"
     $XwbFilePath = "C:\MISE-ITA\MISE-ITA-Master\originalSpeechFiles\Speech.xwb"
     $GameExePath = "C:\GOG Games\Monkey Island 1 SE\MISE.exe"
-    $GameAudioPath = "C:\GOG Games\Monkey Island 1 SE\audio" ######## SI PUO PRENDERE DA $XwbFilePath
-    $DeleteModeWaves = $false; # you want to delete the "Repacker Folder" - $true/$false
+    $GameAudioPath = "C:\GOG Games\Monkey Island 1 SE\audio"
+    $DeleteModeWaves = $false; # You want to delete the "Repacker Folder" - $true/$false
     
     # Store configuration to file
-    Add-Content -Path $configFile -Value $RunGame, $OriginalWavesPath, $DubbedWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath, $DeleteModeWaves
+    Add-Content -Path $ConfigFile -Value $RunGame, $OriginalWavesPath, $DubbedWavesPath, $XwbFilePath, $GameExePath, $GameAudioPath, $DeleteModeWaves
 }
 
-# Check on config file existance
-if (-not(Test-Path -Path $configFile -PathType Leaf)) {
-    # if the file does not exist, create it.
-    try {
-        Write-HostInfo -Text "The config file $configFile does not exists. Creating..."
-        $null = New-Item -ItemType File -Path $configFile -Force -ErrorAction Stop
-        $initWindowsPrompt = $true
+# Check config file existance
+if (-not(Test-Path -Path $ConfigFile -PathType Leaf)) {
+    # If the file does not exist, create it.
+    Write-HostInfo -Text "The config file $ConfigFile does not exists. Creating..."
+    New-Item -ItemType File -Path $ConfigFile -Force -ErrorAction Stop | Out-Null # Create new item
+    Set-Configuration -ConfigFile $ConfigFile # Get and store configuration in config file
 
-        Set-Configuration -ConfigFile $configFile # get and store configuration in config file
-    }
-    catch {
-        throw $_.Exception.Message
-    }
 }
 else {
-    # if the file already exists, show the message and do nothing
+    # If the file already exists, show the message and do nothing
     Write-HostInfo -Text "The config file already exists."
 }
 
-# Store current configuration in variables for this script
+##### Store current configuration in variables for this script #####
+$ConfigTableVal = [string[]]::new((Get-Content $ConfigFile).Length) # Initiate the array
+
 $i = 0
-$ConfigTableVal = [string[]]::new((Get-Content $configFile).Length) # initiate the array
-foreach ($line in Get-Content $configFile) {
-    # get config from file
+foreach ($line in Get-Content $ConfigFile) {
+    # Get config from file
     $ConfigTableVal[$i] = $line.Replace("`"", "")
     $i++
 }
@@ -94,49 +89,57 @@ $GameExePath = $ConfigTableVal[4]
 $GameAudioPath = $ConfigTableVal[5]
 if ($ConfigTableVal[6] -eq "False") { $DeleteModeWaves = $false } else { $DeleteModeWaves = $true }
 
-$configTableKey = @("RunGame", "OriginalWavesPath", "DubbedWavesPath", "XwbFilePath", "GameExePath", "GameAudioPath", "DeleteModeWaves")
-[int]$max = $configTableKey.Count
-$configTableId = 1..$max
-$ConfigTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $ConfigTableVal
+# Create keys for table
+$ConfigTableKey = @("RunGame", "OriginalWavesPath", "DubbedWavesPath", "XwbFilePath", "GameExePath", "GameAudioPath", "DeleteModeWaves")
+[int]$max = $ConfigTableKey.Count
+$ConfigTableId = 1..$max
 
-# show config to user
+# Build table
+$ConfigTable = Build-ConfigTable -TableId $ConfigTableId -TableKey $ConfigTableKey -TableVal $ConfigTableVal
+
+# Show config to user
 Write-HostInfo -Text "This is your current configuration:"
 $ConfigTable | Format-Table
 
-# edit configuration
-$title = "" #"$scriptName Configuration"
-$msg = "Do you want to change the configuration?"
-$options = "&Yes", "&No"
-$default = 1  # 0=Yes, 1=No
+##### Edit configuration #####
+$Title = "" #"$scriptName Configuration"
+$Message = "Do you want to change the configuration?"
+$Options = "&Yes", "&No"
+$Default = 1  # 0=Yes, 1=No
 
 do {
-    $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-    if ($response -eq 0) {
-
-        $title = "" #"$scriptName Configuration"
-        $msg = "Choose the ID you want to change"
-        $options = "&Cancel", "&1", "&2", "&3", "&4", "&5", "&6", "&7"
-        $default = 0  # 0=Cancel
+    # Do until the answer is No (default)
+    $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
+    if ($Response -eq 0) {
+        # The answer is Yes (say, user wants to change configuration)
+        $Title = "" #"$scriptName Configuration"
+        $Message = "Choose the ID you want to change"
+        $Options = "&Cancel", "&1", "&2", "&3", "&4", "&5", "&6", "&7"
+        $Default = 0  # 0=Cancel
 
         do {
-            $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-            switch ($response) {
-                1 { $RunGame = $ConfigTableVal[0] = Edit-Configuration -ConfigKey "RunGame" -ConfigFile $configFile -Index 1 } # see custom function
-                2 { $OriginalWavesPath = $ConfigTableVal[1] = (Edit-Configuration -ConfigKey "OriginalWavesPath" -ConfigFile $configFile -Index 2).Replace("`"", "") }
-                3 { $DubbedWavesPath = $ConfigTableVal[2] = (Edit-Configuration -ConfigKey "DubbedWavesPath" -ConfigFile $configFile -Index 3).Replace("`"", "") }
-                4 { $XwbFilePath = $ConfigTableVal[3] = (Edit-Configuration -ConfigKey "XwbFilePath" -ConfigFile $configFile -Index 4).Replace("`"", "") }
-                5 { $GameExePath = $ConfigTableVal[4] = (Edit-Configuration -ConfigKey "GameMasterPath" -ConfigFile $configFile -Index 5).Replace("`"", "") }
-                6 { $GameAudioPath = $ConfigTableVal[5] = ( Edit-Configuration -ConfigKey "GameAudioPath" -ConfigFile $configFile -Index 6).Replace("`"", "") }
-                7 { $DeleteModeWaves = $ConfigTableVal[6] = Edit-Configuration -ConfigKey "DeleteModeWaves" -ConfigFile $configFile -Index 7 }
+            # Do until the answer is Cancel (default)
+            $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
+            switch ($Response) {
+                # For any cases (say, IDs) the user wants to edit, call custom function Edit-Configuration
+                1 { $RunGame = $ConfigTableVal[0] = Edit-Configuration -ConfigKey "RunGame" -ConfigFile $ConfigFile -Index 1 } # see custom function
+                2 { $OriginalWavesPath = $ConfigTableVal[1] = (Edit-Configuration -ConfigKey "OriginalWavesPath" -ConfigFile $ConfigFile -Index 2).Replace("`"", "") }
+                3 { $DubbedWavesPath = $ConfigTableVal[2] = (Edit-Configuration -ConfigKey "DubbedWavesPath" -ConfigFile $ConfigFile -Index 3).Replace("`"", "") }
+                4 { $XwbFilePath = $ConfigTableVal[3] = (Edit-Configuration -ConfigKey "XwbFilePath" -ConfigFile $ConfigFile -Index 4).Replace("`"", "") }
+                5 { $GameExePath = $ConfigTableVal[4] = (Edit-Configuration -ConfigKey "GameMasterPath" -ConfigFile $ConfigFile -Index 5).Replace("`"", "") }
+                6 { $GameAudioPath = $ConfigTableVal[5] = ( Edit-Configuration -ConfigKey "GameAudioPath" -ConfigFile $ConfigFile -Index 6).Replace("`"", "") }
+                7 { $DeleteModeWaves = $ConfigTableVal[6] = Edit-Configuration -ConfigKey "DeleteModeWaves" -ConfigFile $ConfigFile -Index 7 }
             }
-            $Counter++
-        } until ($response -eq $default)
+            $Counter++ # Used to understand if any change has been made or requested
+        } until ($Response -eq $Default)
     }
 
-} until ($response -eq $default)
+} until ($Response -eq $Default)
 
-$ConfigTable = Build-ConfigTable -TableId $configTableId -TableKey $configTableKey -TableVal $ConfigTableVal
+# Edit table with the new configuration
+$ConfigTable = Build-ConfigTable -TableId $ConfigTableId -TableKey $ConfigTableKey -TableVal $ConfigTableVal
 if ($Counter -gt 1) {
+    # Any changes has been made to the configuration
     Write-HostInfo -Text "This is your new configuration:"
     $ConfigTable | Format-Table
 }
@@ -168,7 +171,7 @@ if ($GameName -match '\.exe$') {
     # Path to the game exe is really an "*.exe"
     $GameProcess = Get-Process -Name ($GameName.Split('.exe')[-2]) -ErrorAction SilentlyContinue
     if ($GameProcess) {
-        # if the game is running, close it
+        # If the game is running, close it
         Write-HostWarn -Text "The is a process $GameName in background. Killing process..."
         $GameProcess | Stop-Process -Force
     }
@@ -183,26 +186,29 @@ else {
 ######## XWB info ########
 ##########################
 ##### Get info from XWB file #####
-$ByteStreamLimit = 150 # to speed up the process
-$XwbHeader = Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit
+$ByteStreamLimit = 150 # Limit the number of bytes to speed up the process
+$XwbHeader = Get-Content $XwbFilePath -AsByteStream -TotalCount $ByteStreamLimit # Get content of XWB file as stream of bytes (limit to $ByteStreamLimit)
+
 # Tool version, aka dwVersion / XACT_CONTENT_VERSION
-$DwVersionBytePosition = [uint32]"0x08" # byte at position 0x08 (see Bible)
-$DwVersion = $XwbHeader[$DwVersionBytePosition]
+$DwVersionBytePosition = [uint32]"0x08" # Byte at position 0x08 (see Documentation)
+$DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition
 Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion"
 
 # File format, aka dwHeaderVersion
-$DwHeaderVersionBytePosition = [uint32]"0x04" # byte at position 0x04 (see Bible)
-$DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition]
+$DwHeaderVersionBytePosition = [uint32]"0x04" # Byte at position 0x04 (see Documentation)
+$DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition
 Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion"
 
+<# DEPRECATED
 # Timestamp
-$XwbTimestampBytePosition = [uint32]"0x8c" # byte at position 0x8c (see Bible)
-$XwbTimestampByteLength = 8 # 8 byte (see Bible)
+$XwbTimestampBytePosition = [uint32]"0x8c" # byte at position 0x8c (see Documentation)
+$XwbTimestampByteLength = 8 # 8 byte (see Documentation)
 $XwbTimestamp = $XwbHeader[$XwbTimestampBytePosition..($XwbTimestampBytePosition + $XwbTimestampByteLength - 1)]
 Write-HostInfo -Text "Timestamp in original XWB header: $XwbTimestamp"
+#>
 
 ##### Preparation for xwb file built #####
-# Repacker Folder
+# Repacker Folder (see Documentation)
 $RepackerWavesPath = ".\RepackerFolder"
 if (-not(Test-Path -Path $RepackerWavesPath)) {
     # Create Repacker folder if it does not exist
@@ -213,12 +219,12 @@ if (-not(Test-Path -Path $RepackerWavesPath)) {
     }
 }
 
-# Info about folders
+# Print info about folders
 Write-HostInfo -Text "Original Folder: $OriginalWavesPath. This folder contains the original WAV files extracted from original XWB file."
 Write-HostInfo -Text "Dubbed Folder: $DubbedWavesPath. This folder contains the WAV files that has been dubbed."
 Write-HostInfo -Text "Repacker Folder: $RepackerWavesPath. This folder contains the WAV files (original and/or dubbed) that will be packed into the new XWB file."
 
-# Delete Mode
+# Delete Mode (see Documentation)
 if ($DeleteModeWaves) {
     Write-HostInfo -Text "Deleting Repacker folder: $RepackerWavesPath..."
     Remove-Item $RepackerWavesPath -Recurse -Force
@@ -233,26 +239,25 @@ robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav | Out-Null 
 ##########################
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $DubbedWavesPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
-$OriginalWavesList = Get-ChildItem $OriginalWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
+$OriginalWavesList = Get-ChildItem $OriginalWavesPath -Filter "*.wav" # Retrieve list of WAV files in Original folder
 $RepackerWavesList = Get-ChildItem $RepackerWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
-$DubbedFilesSizeError = "DubbedFilesError-Size-tmp.txt"
+$DubbedFilesSizeError = "DubbedFilesError-Size-tmp.txt" # Temporary files to store errors
 $DubbedFilesNameError = "DubbedFilesError-Name-tmp.txt"
 $DubbedFilesDateError = "DubbedFilesError-Date-tmp.txt"
 ForEach ($DubbedFile in $DubbedFileList) {
     if ($OriginalWavesList.Name.Contains($DubbedFile.Name)) {
         # The dubbed file exists among the original ones
-        
-        $ID = [uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) and force it to be int32
+        $ID = [uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) as number (int32)
         if ($DubbedFile.Length -le $OriginalWavesList[$ID - 1].Length) {
             # Use the ID to get the corresponding file in Repacker folder and compare file size
             if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
-                # files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
-                <#
+                # Files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
+                <# FOR OPTIMIZATION
                 Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerWavesPath..."
                 #>
-                robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy
+                robocopy $DubbedWavesPath $RepackerWavesPath $DubbedFile.Name # Perform the copy and display a summary to the user
             }
-            <#
+            <# FOR OPTIMIZATION
             else {
                 Write-HostWarn -Text "File dubbed file $DubbedFile already copied."
                 Write-HostInfo "Storing log to file $DubbedFilesDateError..."
@@ -280,13 +285,13 @@ ForEach ($DubbedFile in $DubbedFileList) {
     }
 }
 
-# Clean and reorder files in error
+##### Clean and reorder files in error #####
 $DubbedFilesSizeErrorFinal = "DubbedFilesError-Size.txt"
 $DubbedFilesNameErrorFinal = "DubbedFilesError-Name.txt"
 $DubbedFilesDateErrorFinal = "DubbedFilesError-Date.txt"
 
-# If tmp file exists, sort by name and make the list disting (unique)
 if (Test-Path -Path $DubbedFilesSizeError) {
+    # If tmp file exists, sort by name and make the list disting (unique)
     Get-Content $DubbedFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
 }
 if (Test-Path -Path $DubbedFilesNameError) {
@@ -296,6 +301,7 @@ if (Test-Path -Path $DubbedFilesDateError) {
     Get-Content $DubbedFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
 }
 
+# Display to the user how to use error log files
 Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size.
 `tCheck $DubbedFilesNameErrorFinal for files with wrong name.
 `tCheck $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
@@ -303,52 +309,48 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 ##########################
 ###### Build new XWB #####
 ##########################
-##### Build xwb file from wav #####
+##### Build xwb file from WAV #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
-$ | Out-Null = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
-$XwbToolOutputLogTailLinesNumber = 1 # how many lines at the end of the output in XwbTool log
+$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Documentation for details
+$XwbToolOutputLogTailLinesNumber = 1 # How many lines at the end of the output in XwbTool log
 $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
 $NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
 if ($NumberOfFileElaboratedByXwbTool -lt $NumberOfFilesInRepackerFolder) {
-    # in case we have less files elaborated by XwbTool w.r.t. number of wave files in Repacker Folder
+    # In case we have less files elaborated by XwbTool w.r.t. the number of WAV files in Repacker Folder
     Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Repacker Folder contains $NumberOfFilesInRepackerFolder files!"
     Write-HostError "Fatal Error! Exiting..."
     exit
 }
 
 ##### Update XWB Header #####
-$XwbHeader | Set-Content -Path $header -AsByteStream # Save header to temporary binary file
-[GPSTools]::ReplaceBytes($XwbName, $header, $ByteStreamLimit)
-<#
-# Specific change of "timestamp" in header - DEPRECATED
-$XwbTimestamp | Set-Content -Path $header -AsByteStream # Save header to temporary binary file
+$XwbHeader | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
+[GPSTools]::ReplaceBytes($XwbName, $Header, $ByteStreamLimit) # Substitute the first $ByteStreamLimit bytes in the brand-new $XwbName file in current folder
+<# DEPRECATED
+# Specific change of "timestamp" in header
+$XwbTimestamp | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
 [GPSTools]::ReplaceBytes($XwbName, $XwbTimestamp, $XwbTimestampByteLength, $XwbTimestampBytePosition)
 #>
-Remove-Item $header # Delete temporary binary file
+Remove-Item $Header # Delete temporary binary file
 
 ##########################
 ######### Outtro #########
 ##########################
-##### Move Speech.xwb to MISE folder #####
+##### Move XWB file to game folder #####
 if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) {
-    # if the file does not exist, create a copy to *.original
-    try {
-        Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
-        Write-HostInfo -Text "File $XwbName (assumed to be The Original) renamed in $XwbName.original."
-    }
-    catch {
-        throw $_.Exception.Message
-    }
+    # Create a backup of the original XWB file (adding ".original" at the end of the filename) if not already done
+    Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
+    Write-HostInfo -Text "File $XwbName (assumed to be The Original) renamed in $XwbName.original."
 }
 else {
-    # If the file already exists, show the message and do nothing.
-    Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
+        # If the backup of the original XWB file already exists, show the message and do nothing
+        Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
 }
-Move-Item -Path $XwbName -Destination $GameAudioPath -Force # Copy new Speech.xwb to MISE folder
+Move-Item -Path $XwbName -Destination $GameAudioPath -Force # Copy rebuilt XWB file to game folder
 
 
-##### Start the game #####
+##### Run the game #####
 if ($RunGame) {
+    # Run the game only if it is set so in the configuration
     Write-HostInfo -Text $GameName" is starting..."
     Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
 }

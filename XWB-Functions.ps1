@@ -7,49 +7,50 @@ function Write-HostError {
     param (
         $Text
     )
-    Write-Host "ERROR`t$Text" -ForegroundColor red
+    Write-Host "ERROR`t$Text" -ForegroundColor Red
 }
 
 function Write-HostWarn {
     param (
         $Text
     )
-    Write-Host "WARN`t$Text" -ForegroundColor yellow
+    Write-Host "WARN`t$Text" -ForegroundColor Yellow
 }
 
 function Write-HostInfo {
     param (
         $Text
     )
-    Write-Host "INFO`t$Text" # -ForegroundColor blue
+    Write-Host "INFO`t$Text" # -ForegroundColor Blue
 }
 
-# check folder existance and ask user to or not to create it
+# Check folder existance and ask user to or not to create it
 function Assert-FolderExists {
     param (
         $Folder
     )
 
-    Write-HostInfo -Text "Check existance of $Folder"
-    if (-not(Test-Path $Folder)) { # if the folder does not exists
+    Write-HostInfo -Text "Check existance of $Folder."
+    if (-not(Test-Path $Folder)) {
+        # if the folder does not exists
         Write-HostWarn -Text "The path you selected does not exists."
         Write-HostInfo -Text "Path: $Folder" 
         
-        $title   = "" #"$scriptName Configuration"
-        $msg     = "Do you want to create it?"
-        $options = "&Yes", "&No"
-        $default = 1  # 0=Yes, 1=No
+        $Title = ""
+        $Message = "Do you want to create it?"
+        $Options = "&Yes", "&No"
+        $Default = 1  # 0=Yes, 1=No
         do {
-            $response = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-            if ($response -eq 0) {
+            $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
+            if ($Response -eq 0) {
                 Write-HostInfo -Text "Creating new folder..."
-                New-Item -Path $Folder -ItemType directory
+                New-Item -Path $Folder -ItemType Directory
             }
             else {
                 Write-HostError -Text "It is impossibile to continue. The script will be stopped."
                 exit
             }
-        } until ($response -eq $default -Or (Test-Path $Folder))
+        } until ($Response -eq $Default -Or (Test-Path $Folder))
 
     }
     else {
@@ -57,14 +58,15 @@ function Assert-FolderExists {
     }
 }
 
-# check file existance 
+# Check file existance 
 function Assert-FileExists {
     param (
         $File
     )
 
     Write-HostInfo -Text "Check existance of $File"
-    if (-not(Test-Path $File)) { # if the file does not exists
+    if (-not(Test-Path $File)) {
+        # if the file does not exists
         Write-HostWarn -Text "The path you selected for you file does not exists."
         Write-HostInfo -Text "Path: $File"
         
@@ -76,7 +78,7 @@ function Assert-FileExists {
     }
 }
 
-# edit config file
+# Edit config file
 function Edit-Configuration {
     param (
         $ConfigKey,
@@ -84,44 +86,46 @@ function Edit-Configuration {
         [int16]$Index
     )
 
-    if ($ConfigKey -eq "RunGame") { # specific case to match true/false values
+    if ($ConfigKey -eq "RunGame") {
+        # Specific case to match true/false values
         do {
-            $prompt = Read-Host "What is the new value? [True/False]" # prompt user to insert new value from keyboard 
-        } until ($prompt -eq "True" -Or $prompt -eq "False")
+            $Prompt = Read-Host "What is the new value? [True/False]" # Prompt user to insert new value from keyboard 
+        } until ($Prompt -eq "True" -Or $Prompt -eq "False")
 
-        if ($prompt -eq "False") {
-            $output = $false
+        if ($Prompt -eq "False") {
+            $Output = $false
         }
         else {
-            $output = $true
+            $Output = $true
         }
         
     }
-    elseif ($ConfigKey -eq "DeleteModeWaves") { # specific case to match true/false values
+    elseif ($ConfigKey -eq "DeleteModeWaves") {
+        # specific case to match true/false values
         do {
-            $prompt = Read-Host "What is the new value? [True/False]" # prompt user to insert new value from keyboard 
-        } until ($prompt -eq "True" -Or $prompt -eq "False")
+            $Prompt = Read-Host "What is the new value? [True/False]" # Prompt user to insert new value from keyboard 
+        } until ($Prompt -eq "True" -Or $Prompt -eq "False")
 
-        if ($prompt -eq "False") {
-            $output = $false
+        if ($Prompt -eq "False") {
+            $Output = $false
         }
         else {
-            $output = $true
+            $Output = $true
         }
         
     }
     else {
-        $output = (Read-Host "Please, enter the new value").Replace("`"","") # prompt user to insert new value from keyboard
+        $Output = (Read-Host "Please, enter the new value:").Replace("`"", "") # Prompt user to insert new value from keyboard
     }
 
-    $content = Get-Content $ConfigFile # Get file content and store it into variable
-    $content[$Index-1] = $output # Replace the line number 0 by a new text
-    $content | Set-Content $ConfigFile # Set the new content
+    $Content = Get-Content $ConfigFile # Get file content and store it into variable
+    $Content[$Index - 1] = $Output # Replace the line number 0 by a new text
+    $Content | Set-Content $ConfigFile # Set the new content
 
-    return $output
+    return $Output
 }
 
-# build config table to be shown the user on screen
+# Build config table to be shown the user on screen
 function Build-ConfigTable {
     param (
         [int16[]]$TableId,
@@ -129,15 +133,13 @@ function Build-ConfigTable {
         [string[]]$TableVal
     )
 
-    $configTable = for ($i = 0; $i -lt $max; $i++) {
+    $ConfigTable = for ($i = 0; $i -lt $max; $i++) {
         [PSCustomObject]@{
-            ID = $TableId[$i]
+            ID        = $TableId[$i]
             Parameter = $TableKey[$i]
-            Value = $TableVal[$i]
+            Value     = $TableVal[$i]
         }
     }
 
-    return $configTable
+    return $ConfigTable
 }
-
-# in case the user
