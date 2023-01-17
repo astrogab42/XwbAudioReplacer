@@ -226,7 +226,7 @@ if ($DeleteModeWaves) {
 
 # Copy of original WAV files in Repacker folder
 Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath with Robocopy..."
-$RepackerFolderCopy = robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
+robocopy /xc /xn /xo $OriginalWavesPath $RepackerWavesPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
 ##########################
 ######## Dubbing #########
@@ -305,7 +305,7 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 ##########################
 ##### Build xwb file from wav #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
-$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
+$ | Out-Null = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Bible for details
 $XwbToolOutputLogTailLinesNumber = 1 # how many lines at the end of the output in XwbTool log
 $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
 $NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
