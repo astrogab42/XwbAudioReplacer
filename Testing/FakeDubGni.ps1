@@ -1,9 +1,7 @@
+$InputFolder = "C:\repository\XWB-DUBKIT\RepackerFolder"
+$OutputFolder = "D:\Progetti Personali\Monkey Island - Doppiaggio in italiano\xwb-dubkit test\audio doppiato"
 
-
-$InputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV"
-$OutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Dubbed-Folder"
-
-$FakeWavPath = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\bbb.wav"
+$FakeWavPath = "D:\Progetti Personali\Monkey Island - Doppiaggio in italiano\xwb-dubkit test\gnignigni.wav"
 
 $InputList = Get-ChildItem $InputFolder -Filter "*.wav"
 foreach ($File in $InputList) {
