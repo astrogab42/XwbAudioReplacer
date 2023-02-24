@@ -1,3 +1,5 @@
+Clear-Host
+
 Write-Host "XWB-Repacker STARTED" -ForegroundColor blue
 
 # Include external functions
@@ -34,6 +36,7 @@ public class GPSTools
 ##########################
 $CurrentTimestamp = Get-Date -Format "yyyyMMddHHmmss"
 $Header = "header.bin"
+$RepackerFolderPath = ".\RepackerFolder"
 $AddCustomSoundMode = $false
 $RebuildCustomXwbMode = $false
 $EditConfigurationMode = $false
@@ -105,10 +108,6 @@ if (-not(Assert-FileExists -File $GameExePath)) {
 # Build table
 $ConfigTable = Build-ConfigTable -TableId $ConfigTableId -TableKey $ConfigTableKey -TableVal $ConfigTableVal
 
-# Show config to user
-Write-HostInfo -Text "This is your current configuration:"
-$ConfigTable | Format-Table
-
 ############################
 ##### Game is running ######
 ############################
@@ -132,6 +131,11 @@ else {
 ##### User Menu ######
 ######################
 do {
+    Clear-Host
+    # Show config to user
+    Write-HostInfo -Text "This is your current configuration:"
+    $ConfigTable | Format-Table
+
     $TitleMainMenu = ""
     $MessageMainMenu = "Make your choice:"
     $OptionsMainMenu = @(
@@ -152,59 +156,58 @@ do {
         ########### Synchronise custom audio files ###########
         ######################################################
         1 { 
-            Write-HostInfo -Text "Deleting Repacker folder: $RepackerWavesPath..."
-            Remove-Item $RepackerWavesPath -Recurse -Force
+            if (Test-Path -Path $RepackerFolderPath) {
+                Write-HostInfo -Text "Deleting Repacker folder: $RepackerFolderPath..."
+                Remove-Item $RepackerFolderPath -Recurse -Force
+            }
+            else {
+                #log debug cartella repacker non esiste, non la devo cancellare
+            }
         }
 
         ##########################################
         ########### Edit configuration ###########
         ##########################################
         2 {
-            $Title = "" #"$scriptName Configuration"
-            $Message = "Do you want to change the configuration?"
-            $Options = @(
-                [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "Change the script's working folders and decide whether or not to start the game after execution.")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&No", "Keep your current configuration.")
-            )
-            $Default = 1  # 0=Yes, 1=No
+            # The answer is Yes (say, user wants to change configuration)
+            Clear-Host
+            # Show config to user
+            Write-HostInfo -Text "This is your current configuration:"
+            $ConfigTable | Format-Table
+            # Menu
+            $TitleConfMenu = ""
+            $MessageConfMenu = "Choose the ID you want to change"
+            $OptionsConfMenu = @(
+                [System.Management.Automation.Host.ChoiceDescription]::new("&Back to main menu", "Exit from change configuration mode.")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&1 - OriginalWavPath", "The path containing the WAV files extracted from the XWB file with XWBExtractor.ps1")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&2 - CustomWavPath", "The path that will contain the user's audio files")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&3 - XwbPath", "The path to the XWB file inside the game folder")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&4 - GameExePath", "The path to the exe file of the game launcher")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&5 - RunGame", "Whether or not to run the game")
+            )        
+            $DefaultConfMenu = 0  # 0=Cancel
     
-            ###do {
-                # Do until the answer is No (default)
-                ###$Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
-                ###if ($Response -eq 0) {
-                    # The answer is Yes (say, user wants to change configuration)
-                    $Title = ""
-                    $Message = "Choose the ID you want to change"
-                    $Options = @(
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&Back to main menu", "Exit from change configuration mode.")
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&1 - OriginalWavPath", "The path containing the WAV files extracted from the XWB file with XWBExtractor.ps1")
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&2 - CustomWavPath", "The path that will contain the user's audio files")
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&3 - XwbPath", "The path to the XWB file inside the game folder")
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&4 - GameExePath", "The path to the exe file of the game launcher")
-                        [System.Management.Automation.Host.ChoiceDescription]::new("&5 - RunGame", "Whether or not to run the game")
-                    )        
-                    $Default = 0  # 0=Cancel
-    
-                    do {
-                        # Do until the answer is Cancel (default)
-                        $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
-                        switch ($Response) {
-                            # For any cases (say, IDs) the user wants to edit, call custom function Edit-Configuration
-                            1 { $OriginalWavPath = $ConfigTableVal[0] = (Edit-Configuration -ConfigKey "OriginalWavPath" -ConfigFile $ConfigFile -Index 1).Replace("`"", "") } # see custom function
-                            2 { $CustomWavPath = $ConfigTableVal[1] = (Edit-Configuration -ConfigKey "CustomWavPath" -ConfigFile $ConfigFile -Index 2).Replace("`"", "") }
-                            3 { $XwbPath = $ConfigTableVal[2] = (Edit-Configuration -ConfigKey "XwbPath" -ConfigFile $ConfigFile -Index 3).Replace("`"", "") }
-                            4 { $GameExePath = $ConfigTableVal[3] = (Edit-Configuration -ConfigKey "GameExePath" -ConfigFile $ConfigFile -Index 4).Replace("`"", "") }
-                            5 { $RunGame = $ConfigTableVal[4] = Edit-Configuration -ConfigKey "RunGame" -ConfigFile $ConfigFile -Index 5 }
-                        }
-                        $Counter++ # Used to understand if any change has been made or requested
-                    } until ($Response -eq $Default)
-                ###}
-    
-            ###} until ($Response -eq $Default)
+            do {
+                # Do until the answer is Cancel (default)
+                $ResponseConfMenu = $Host.UI.PromptForChoice($TitleConfMenu, $MessageConfMenu, $OptionsConfMenu, $DefaultConfMenu)
+                switch ($ResponseConfMenu) {
+                    # For any cases (say, IDs) the user wants to edit, call custom function Edit-Configuration
+                    1 { $OriginalWavPath = $ConfigTableVal[0] = (Edit-Configuration -ConfigKey "OriginalWavPath" -ConfigFile $ConfigFile -Index 1).Replace("`"", "") } # see custom function
+                    2 { $CustomWavPath = $ConfigTableVal[1] = (Edit-Configuration -ConfigKey "CustomWavPath" -ConfigFile $ConfigFile -Index 2).Replace("`"", "") }
+                    3 { $XwbPath = $ConfigTableVal[2] = (Edit-Configuration -ConfigKey "XwbPath" -ConfigFile $ConfigFile -Index 3).Replace("`"", "") }
+                    4 { $GameExePath = $ConfigTableVal[3] = (Edit-Configuration -ConfigKey "GameExePath" -ConfigFile $ConfigFile -Index 4).Replace("`"", "") }
+                    5 { $RunGame = $ConfigTableVal[4] = Edit-Configuration -ConfigKey "RunGame" -ConfigFile $ConfigFile -Index 5 }
+                }
+                $CounterConfMenu++ # Used to understand if any change has been made or requested
+
+                if ($ResponseConfMenu -eq $DefaultConfMenu) {
+                    Clear-Host
+                }
+            } until ($ResponseConfMenu -eq $DefaultConfMenu)
     
             # Edit table with the new configuration
             $ConfigTable = Build-ConfigTable -TableId $ConfigTableId -TableKey $ConfigTableKey -TableVal $ConfigTableVal
-            if ($Counter -gt 1) {
+            if ($CounterConfMenu -gt 1) {
                 # Any changes has been made to the configuration
                 Write-HostInfo -Text "This is your new configuration:"
                 $ConfigTable | Format-Table
@@ -227,7 +230,7 @@ do {
         }
     }
 
-} until ($Response -eq $Default)
+} until ($ResponseMainMenu -eq $DefaultMainMenu)
 
 Write-Host "Debug mode on"
 exit
@@ -259,11 +262,10 @@ Write-HostInfo -Text "Timestamp in original XWB header: $XwbTimestamp"
 
 ##### Preparation for xwb file built #####
 # Repacker Folder (see Documentation)
-$RepackerWavesPath = ".\RepackerFolder"
-if (-not(Test-Path -Path $RepackerWavesPath)) {
+if (-not(Test-Path -Path $RepackerFolderPath)) {
     # Create Repacker folder if it does not exist
-    Write-HostInfo -Text "Creating Repacker folder: $RepackerWavesPath..."
-    New-Item $RepackerWavesPath -ItemType Directory | Out-Null
+    Write-HostInfo -Text "Creating Repacker folder: $RepackerFolderPath..."
+    New-Item $RepackerFolderPath -ItemType Directory | Out-Null
 }
 else {
     Write-HostInfo -Text "Repacker Folder exists."
@@ -273,11 +275,11 @@ else {
 # Print info about folders
 Write-HostInfo -Text "Original Folder: $OriginalWavPath. This folder contains the original WAV files extracted from original XWB file."
 Write-HostInfo -Text "Dubbed Folder: $CustomWavPath. This folder contains the WAV files that has been dubbed."
-Write-HostInfo -Text "Repacker Folder: $RepackerWavesPath. This folder contains the WAV files (original and/or dubbed) that will be packed into the new XWB file."
+Write-HostInfo -Text "Repacker Folder: $RepackerFolderPath. This folder contains the WAV files (original and/or dubbed) that will be packed into the new XWB file."
 
 # Copy of original WAV files in Repacker folder
-Write-HostInfo -Text "Construction of Repacker folder: $RepackerWavesPath with Robocopy..."
-robocopy /xc /xn /xo $OriginalWavPath $RepackerWavesPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
+Write-HostInfo -Text "Construction of Repacker folder: $RepackerFolderPath with Robocopy..."
+robocopy /xc /xn /xo $OriginalWavPath $RepackerFolderPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
 ##########################
 ######## Dubbing #########
@@ -285,7 +287,7 @@ robocopy /xc /xn /xo $OriginalWavPath $RepackerWavesPath /if *.wav | Out-Null # 
 # Copy dubbed audio files from Dubbed folder to Repacker folder
 $DubbedFileList = Get-ChildItem $CustomWavPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
 $OriginalWavesList = Get-ChildItem $OriginalWavPath -Filter "*.wav" # Retrieve list of WAV files in Original folder
-$RepackerWavesList = Get-ChildItem $RepackerWavesPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
+$RepackerWavesList = Get-ChildItem $RepackerFolderPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
 $DubbedFilesSizeError = "DubbedFilesError-Size-tmp.txt" # Temporary files to store errors
 $DubbedFilesNameError = "DubbedFilesError-Name-tmp.txt"
 $DubbedFilesDateError = "DubbedFilesError-Date-tmp.txt"
@@ -298,9 +300,9 @@ ForEach ($DubbedFile in $DubbedFileList) {
             if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
                 # Files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
                 <# FOR OPTIMIZATION
-                Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerWavesPath..."
+                Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerFolderPath..."
                 #>
-                robocopy $CustomWavPath $RepackerWavesPath $DubbedFile.Name # Perform the copy and display a summary to the user
+                robocopy $CustomWavPath $RepackerFolderPath $DubbedFile.Name # Perform the copy and display a summary to the user
             }
             <# FOR OPTIMIZATION
             else {
@@ -356,7 +358,7 @@ Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size
 ##########################
 ##### Build xwb file from WAV #####
 Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
-$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerWavesPath\*.wav" # see XWBTool usage on Documentation for details
+$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerFolderPath\*.wav" # see XWBTool usage on Documentation for details
 $XwbToolOutputLogTailLinesNumber = 1 # How many lines at the end of the output in XwbTool log
 $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
 $NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
