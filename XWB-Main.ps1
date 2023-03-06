@@ -12,7 +12,8 @@ function Add-AllCustomSoundFiles {
         $Header,
         $GameAudioPath,
         $GameName,
-        $GameExePath
+        $GameExePath,
+        $RunGame
     )
 
     ##### .NET code #####

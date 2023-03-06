@@ -123,7 +123,7 @@ do {
         ##################################################
         ########### Add all custom sound files ###########
         ##################################################
-        0 { Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -RepackerFolderPath $RepackerFolderPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath }
+        0 { Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -RepackerFolderPath $RepackerFolderPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame}
 
         ######################################################
         ########### Synchronise custom audio files ###########
@@ -209,7 +209,3 @@ do {
     }
 
 } until ($ResponseMainMenu -eq $DefaultMainMenu)
-
-Write-Host "Debug mode on"
-exit
-
