@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-xwbrepacker.config
+xwbrepacker*.config
 RepackerFolder
 *.xwb
 DubbedFilesError-*.txt
