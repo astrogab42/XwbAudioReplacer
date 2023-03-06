@@ -10,13 +10,8 @@ Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
 ##########################
 ##### Initialization #####
 ##########################
-$CurrentTimestamp = Get-Date -Format "yyyyMMddHHmmss"
 $Header = "header.bin"
 $RepackerFolderPath = ".\RepackerFolder"
-$AddCustomSoundMode = $false
-$RebuildCustomXwbMode = $false
-$EditConfigurationMode = $false
-$RestoreOriginalXwbMode = $false
 
 ##########################
 ##### Configuration ######
