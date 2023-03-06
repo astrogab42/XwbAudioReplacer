@@ -1,8 +1,8 @@
-﻿Write-Host "XWB-Extractor STARTED" -ForegroundColor blue
+﻿Write-Host "Welcome to XWB-Extractor!" -ForegroundColor blue
 
 ##### INITIALIZATION #####
 # Include external functions
-. ".\XWB-Functions.ps1"
+. ".\XWB-Tools.ps1"
 
 # Configuration
 $wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
