@@ -13,7 +13,7 @@ Assert-FileExists -File $xwbInputFile
 
 # extract wav from xwb
 Write-HostInfo "Extracting WAV files from XWB file"
-$extractWav = .\towav.exe $xwbInputFile 
+.\towav.exe $xwbInputFile | Out-Null
 Write-HostInfo "Moving WAV files to destination folder $wavOutputFolder"
 Move-Item *.wav $wavOutputFolder
 
