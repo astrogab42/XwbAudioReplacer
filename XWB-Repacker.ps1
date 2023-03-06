@@ -158,7 +158,7 @@ do {
             }
             
             # Run MAIN
-            Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath
+            Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame
         }
 
         ##########################################
