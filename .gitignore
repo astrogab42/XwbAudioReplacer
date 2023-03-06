@@ -12,6 +12,7 @@
 xwbrepacker*.config
 RepackerFolder
 *.xwb
+*.wav
 DubbedFilesError-*.txt
 
 
