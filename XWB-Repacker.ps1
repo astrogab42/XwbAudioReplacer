@@ -7,6 +7,31 @@ Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
 . ".\XWB-Configuration.ps1"
 . ".\XWB-Main.ps1"
 
+##### .NET code #####
+# replace data in file as byte stream
+Add-Type -TypeDefinition @"
+using System;
+using System.IO;
+using System.Text;
+using System.Linq;
+
+public class GPSTools
+{
+    public static void ReplaceBytes(string fileName, string replaceFileName, int length, int offset = 0)
+    {
+        byte[] newData = File.ReadAllBytes(replaceFileName);
+        if(length != 0)
+        {
+            newData = newData.Take(length).ToArray();
+        }
+        Stream stream = File.Open(fileName, FileMode.Open);
+        stream.Position = offset;
+        stream.Write(newData, 0, newData.Length);
+        stream.Close();
+    }
+}
+"@
+
 ##########################
 ##### Initialization #####
 ##########################
