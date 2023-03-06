@@ -223,8 +223,17 @@ do {
                 Remove-Item $XwbPath
                 Rename-Item -Path $GameAudioPath"\"$XwbName".original" -NewName $XwbName
             }
-            Write-HostInfo -Text "Original XWB file restored. Exiting..."
-            exit
+            Write-HostInfo -Text "Original XWB file restored."
+            
+            if ($RunGame) {
+                # Run the game only if it is set so in the configuration
+                Write-HostInfo -Text $GameName" is starting..."
+                Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
+            }
+            else {
+                Write-HostInfo -Text "You chose not to start $GameName. Exiting..."
+                exit
+            }
         }
     }
 
