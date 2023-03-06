@@ -134,6 +134,18 @@ function Add-AllCustomSoundFiles {
     `tCheck $DubbedFilesNameErrorFinal for files with wrong name.
     `tCheck $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
 
+    # Work clean
+    if (Test-Path -Path $DubbedFilesSizeError) {
+        # If tmp file exists, delete it
+        Remove-Item $DubbedFilesSizeError
+    }
+    if (Test-Path -Path $DubbedFilesNameError) {
+        Remove-Item $DubbedFilesNameError
+    }
+    if (Test-Path -Path $DubbedFilesDateError) {
+        Remove-Item $DubbedFilesDateError
+    }
+
     ##########################
     ###### Build new XWB #####
     ##########################
