@@ -7,13 +7,13 @@
 # Configuration
 $wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 $Output = Assert-FolderExists -Folder $wavOutputFolder
-if (not($Output)) {
+if (-not($Output)) {
     exit
 }
 
 $xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
 Assert-FileExists -File $xwbInputFile
-if (not($Output)) {
+if (-not($Output)) {
     exit
 }
 
