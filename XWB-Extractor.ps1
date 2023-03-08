@@ -27,6 +27,7 @@ if (-not($Output)) {
 if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     # if the folder is not empty
     Write-HostError "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
+    exit
 }
 
 ##### MAIN #####
