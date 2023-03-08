@@ -1,22 +1,32 @@
-﻿Write-Host "Welcome to XWB-Extractor!" -ForegroundColor blue
+﻿Clear-Host
+
+Write-Host "Welcome to XWB-Extractor!" -ForegroundColor blue
 
 ##### INITIALIZATION #####
 # Include external functions
 . ".\XWB-Tools.ps1"
 
-# Configuration
-$wavOutputFolder = (Read-Host "Please, enter the path to the XWB file").Replace("`"", "") # Prompt user to insert new value from keyboard
+##### CONFIGURATION #####
+# XWB File
+Write-HostInfo -Text "Let me know the XWB file you want to extract."
+$xwbInputFile = (Read-Host "Please, enter the path to the XWB file").Replace("`"", "") # Prompt user to insert new value from keyboard
 #$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
-Assert-FileExists -File $xwbInputFile
+$Output = Assert-FileExists -File $xwbInputFile
 if (-not($Output)) {
     exit
 }
 
-$wavOutputFolder = (Read-Host "Please, enter the path to the folder that will be filled with extraction of wav files").Replace("`"", "") # Prompt user to insert new value from keyboard
+# Destination folder for extraction
+Write-HostInfo -Text "Now, let me know the folder where you want me to save the extracted WAV files. The folder MUST be empty."
+$wavOutputFolder = (Read-Host "Please, enter the path to the folder where to extract the wav files").Replace("`"", "") # Prompt user to insert new value from keyboard
 #$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 $Output = Assert-FolderExists -Folder $wavOutputFolder
 if (-not($Output)) {
     exit
+}
+if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
+    # if the folder is not empty
+    Write-HostError "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
 }
 
 # extract wav from xwb
@@ -32,7 +42,8 @@ ForEach ($thisFile in $fileList.Name) {
     $number = $thisFile.Split(" ")[0]
     $wavName = $thisFile.Split(" ")[-1] # Assumption: towav.exe output file name is as "<number> filename.wav"
     
-    if ($thisFile.Split(" ").Length -gt 1) { #If there are no spaces in file name (file name already renamed)
+    if ($thisFile.Split(" ").Length -gt 1) {
+        #If there are no spaces in file name (file name already renamed)
         if ($number.ToString().Length -eq 1) {
             Rename-Item -Path $wavOutputFolder"\"$thisFile -NewName ("0000" + $number + "_" + $wavName)
         }
