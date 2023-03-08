@@ -136,6 +136,7 @@ do {
         [System.Management.Automation.Host.ChoiceDescription]::new("&Synchronise custom audio files", "Loads all custom audio files currently in the custom files folder into the game and restores the original version for all other WAV files. Use this function if you wish to remove previously loaded custom sound files from the game that are no longer present in the custom sound files folder.")
         [System.Management.Automation.Host.ChoiceDescription]::new("&Edit configuration", "Use this function if you want to change the script's working folders and decide whether or not to start the game after execution.")
         [System.Management.Automation.Host.ChoiceDescription]::new("&Restore the original XWB file", "Restores the original XWB file created by the game developers. To be used in case something goes wrong and the game no longer starts.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&Delete Cache", "Delete the temporary files of this script. No user file will be deleted. Use this function at the end of use or when you want to archive this script on disk while occupying as few space as possible.")
         [System.Management.Automation.Host.ChoiceDescription]::new("&Terminate script", "Exit the script.")
         )
     $DefaultMainMenu = 0
@@ -153,9 +154,6 @@ do {
             if (Test-Path -Path $RepackerFolderPath) {
                 Write-HostInfo -Text "Deleting Repacker folder: $RepackerFolderPath..."
                 Remove-Item $RepackerFolderPath -Recurse -Force
-            }
-            else {
-                #log debug cartella repacker non esiste, non la devo cancellare
             }
             
             # Run MAIN
@@ -237,10 +235,22 @@ do {
             }
         }
 
+        ##########################
+        ###### Delete Cache ######
+        ##########################
+        4 {
+            if (Test-Path -Path $RepackerFolderPath) {
+                Write-HostInfo -Text "Deleting Repacker folder: $RepackerFolderPath..."
+                Remove-Item $RepackerFolderPath -Recurse -Force
+            }
+
+            exit
+        }
+
         ##################
         ###### Exit ######
         ##################
-        4 { exit }
+        5 { exit }
     }
 
 } until ($ResponseMainMenu -eq $DefaultMainMenu)
