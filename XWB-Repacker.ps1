@@ -136,7 +136,8 @@ do {
         [System.Management.Automation.Host.ChoiceDescription]::new("&Synchronise custom audio files", "Loads all custom audio files currently in the custom files folder into the game and restores the original version for all other WAV files. Use this function if you wish to remove previously loaded custom sound files from the game that are no longer present in the custom sound files folder.")
         [System.Management.Automation.Host.ChoiceDescription]::new("&Edit configuration", "Use this function if you want to change the script's working folders and decide whether or not to start the game after execution.")
         [System.Management.Automation.Host.ChoiceDescription]::new("&Restore the original XWB file", "Restores the original XWB file created by the game developers. To be used in case something goes wrong and the game no longer starts.")
-    )
+        [System.Management.Automation.Host.ChoiceDescription]::new("&Terminate script", "Exit the script.")
+        )
     $DefaultMainMenu = 0
     $ResponseMainMenu = $Host.UI.PromptForChoice($TitleMainMenu, $MessageMainMenu, $OptionsMainMenu, $DefaultMainMenu)
     switch ($ResponseMainMenu) {
@@ -235,6 +236,11 @@ do {
                 exit
             }
         }
+
+        ##################
+        ###### Exit ######
+        ##################
+        4 { exit }
     }
 
 } until ($ResponseMainMenu -eq $DefaultMainMenu)
