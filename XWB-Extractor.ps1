@@ -5,14 +5,16 @@
 . ".\XWB-Tools.ps1"
 
 # Configuration
-$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
-$Output = Assert-FolderExists -Folder $wavOutputFolder
+$wavOutputFolder = (Read-Host "Please, enter the path to the XWB file").Replace("`"", "") # Prompt user to insert new value from keyboard
+#$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
+Assert-FileExists -File $xwbInputFile
 if (-not($Output)) {
     exit
 }
 
-$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
-Assert-FileExists -File $xwbInputFile
+$wavOutputFolder = (Read-Host "Please, enter the path to the folder that will be filled with extraction of wav files").Replace("`"", "") # Prompt user to insert new value from keyboard
+#$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
+$Output = Assert-FolderExists -Folder $wavOutputFolder
 if (-not($Output)) {
     exit
 }
