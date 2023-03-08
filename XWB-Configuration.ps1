@@ -100,3 +100,18 @@ function Build-ConfigTable {
 
     return $ConfigTable
 }
+
+# Print Config to user
+function Show-Config {
+    param (
+        $ConfigTable
+    )
+
+    Clear-Host
+
+    Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
+    
+    # Show config to user
+    Write-HostInfo -Text "This is your current configuration:"
+    $ConfigTable | Format-Table
+}
