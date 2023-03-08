@@ -22,14 +22,28 @@ $wavOutputFolder = (Read-Host "Please, enter the path to the folder where to ext
 #$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 $Output = Assert-FolderExists -Folder $wavOutputFolder
 if (-not($Output)) {
-    exit
+    $Title = ""
+    $Message = "Do you want to create it?"
+    $Options = "&Yes", "&No"
+    $Default = 1  # 0=Yes, 1=No
+    do {
+        $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
+        if ($Response -eq 0) {
+            #Write-HostInfo -Text "Creating new folder..."
+            New-Item -Path $wavOutputFolder -ItemType Directory
+        }
+        else {
+            Write-HostError -Text "It is impossibile to continue. The script will be stopped."
+            exit
+        }
+    } until ($Response -eq $Default -Or (Test-Path $wavOutputFolder))
 }
 if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     # if the folder is not empty
     Write-HostError "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
     exit
 }
-
+exit
 ##### MAIN #####
 # extract wav from xwb
 Write-HostInfo "Extracting WAV files from XWB file"
