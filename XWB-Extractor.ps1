@@ -40,7 +40,8 @@ if (-not($Output)) {
 }
 if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     # if the folder is not empty
-    Write-HostError "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
+    Write-HostError -Text "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
+    Write-HostInfo -Text "Hint! Remember that you can use option R in XWB-Reparcker to restore the original XWB file"
     exit
 }
 exit
