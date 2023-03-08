@@ -29,6 +29,7 @@ if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     Write-HostError "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
 }
 
+##### MAIN #####
 # extract wav from xwb
 Write-HostInfo "Extracting WAV files from XWB file"
 .\towav.exe $xwbInputFile | Out-Null
