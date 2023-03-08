@@ -5,7 +5,7 @@
 function Add-AllCustomSoundFiles {
     param (
         $XwbPath,
-        $RepackerFolderPath,
+        $CacheFolderPath,
         $OriginalWavPath,
         $CustomWavPath,
         $XwbName,
@@ -43,10 +43,10 @@ function Add-AllCustomSoundFiles {
 
     ##### Preparation for xwb file built #####
     # Repacker Folder (see Documentation)
-    if (-not(Test-Path -Path $RepackerFolderPath)) {
+    if (-not(Test-Path -Path $CacheFolderPath)) {
         # Create Repacker folder if it does not exist
-        Write-HostInfo -Text "Creating Repacker folder: $RepackerFolderPath..."
-        New-Item $RepackerFolderPath -ItemType Directory | Out-Null
+        Write-HostInfo -Text "Creating cache folder: $CacheFolderPath..."
+        New-Item $CacheFolderPath -ItemType Directory | Out-Null
     }
     else {
         Write-HostInfo -Text "Repacker Folder exists."
@@ -56,11 +56,11 @@ function Add-AllCustomSoundFiles {
     # Print info about folders
     Write-HostInfo -Text "Original Folder: $OriginalWavPath. This folder contains the original WAV files extracted from original XWB file."
     Write-HostInfo -Text "Custom Folder: $CustomWavPath. This folder contains the WAV files that has been customized."
-    Write-HostInfo -Text "Repacker Folder: $RepackerFolderPath. This folder contains the WAV files (original and/or custom) that will be packed into the new XWB file."
+    Write-HostInfo -Text "Cache Folder: $CacheFolderPath. This folder contains the WAV files (original and/or custom) that will be packed into the new XWB file."
 
     # Copy of original WAV files in Repacker folder
-    Write-HostInfo -Text "Construction of Repacker folder: $RepackerFolderPath with Robocopy..."
-    robocopy /xc /xn /xo $OriginalWavPath $RepackerFolderPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
+    Write-HostInfo -Text "Construction of cache folder: $CacheFolderPath with Robocopy..."
+    robocopy /xc /xn /xo $OriginalWavPath $CacheFolderPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
     ################################
     ######## Customization #########
@@ -68,7 +68,7 @@ function Add-AllCustomSoundFiles {
     # Copy custom audio files from Custom folder to Repacker folder
     $CustomFileList = Get-ChildItem $CustomWavPath -Filter "*.wav" # Retrieve list of custom WAV files in Custom folder
     $OriginalWavesList = Get-ChildItem $OriginalWavPath -Filter "*.wav" # Retrieve list of WAV files in Original folder
-    $RepackerWavesList = Get-ChildItem $RepackerFolderPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
+    $RepackerWavesList = Get-ChildItem $CacheFolderPath -Filter "*.wav" # Retrieve list of WAV files in cache folder
     $CustomFilesSizeError = "Log-CustomFilesError-Size-tmp.txt" # Temporary files to store errors
     $CustomFilesNameError = "Log-CustomFilesError-Name-tmp.txt"
     $CustomFilesDateError = "Log-CustomFilesError-Date-tmp.txt"
@@ -81,9 +81,9 @@ function Add-AllCustomSoundFiles {
                 if (-not($CustomFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
                     # Files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
                     <# FOR OPTIMIZATION
-                    Write-HostInfo "Copying custom file $CustomFile to Repacker folder $RepackerFolderPath..."
+                    Write-HostInfo "Copying custom file $CustomFile to Repacker folder $CacheFolderPath..."
                     #>
-                    robocopy $CustomWavPath $RepackerFolderPath $CustomFile.Name # Perform the copy and display a summary to the user
+                    robocopy $CustomWavPath $CacheFolderPath $CustomFile.Name # Perform the copy and display a summary to the user
                 }
                 <# FOR OPTIMIZATION
                 else {
@@ -151,14 +151,14 @@ function Add-AllCustomSoundFiles {
     ##########################
     ##### Build xwb file from WAV #####
     Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
-    $buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$RepackerFolderPath\*.wav" # see XWBTool usage on Documentation for details
+    $buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$CacheFolderPath\*.wav" # see XWBTool usage on Documentation for details
     $XwbToolOutputLogHeadLinesNumber = 0 # How many lines at the beginning of the output in XwbTool log
     $XwbToolOutputLogTailLinesNumber = 1 # How many lines at the end of the output in XwbTool log
     $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
-    $NumberOfFilesInRepackerFolder = $RepackerWavesList.Length
-    if ($NumberOfFileElaboratedByXwbTool -lt $NumberOfFilesInRepackerFolder) {
+    $NumberOfFilesInCacheFolder = $RepackerWavesList.Length
+    if ($NumberOfFileElaboratedByXwbTool -lt $NumberOfFilesInCacheFolder) {
         # In case we have less files elaborated by XwbTool w.r.t. the number of WAV files in Repacker Folder
-        Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Repacker Folder contains $NumberOfFilesInRepackerFolder files!"
+        Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Repacker Folder contains $NumberOfFilesInCacheFolder files!"
         Write-HostError "Fatal Error! Exiting..."
         exit
     }
