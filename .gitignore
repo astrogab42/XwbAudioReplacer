@@ -13,7 +13,7 @@ xwbrepacker*.config
 RepackerFolder
 *.xwb
 *.wav
-CustomFilesError-*.txt
+Log-CustomFilesError-*.txt
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)

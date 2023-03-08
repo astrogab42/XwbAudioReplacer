@@ -55,78 +55,78 @@ function Add-AllCustomSoundFiles {
 
     # Print info about folders
     Write-HostInfo -Text "Original Folder: $OriginalWavPath. This folder contains the original WAV files extracted from original XWB file."
-    Write-HostInfo -Text "Dubbed Folder: $CustomWavPath. This folder contains the WAV files that has been dubbed."
-    Write-HostInfo -Text "Repacker Folder: $RepackerFolderPath. This folder contains the WAV files (original and/or dubbed) that will be packed into the new XWB file."
+    Write-HostInfo -Text "Custom Folder: $CustomWavPath. This folder contains the WAV files that has been customized."
+    Write-HostInfo -Text "Repacker Folder: $RepackerFolderPath. This folder contains the WAV files (original and/or custom) that will be packed into the new XWB file."
 
     # Copy of original WAV files in Repacker folder
     Write-HostInfo -Text "Construction of Repacker folder: $RepackerFolderPath with Robocopy..."
     robocopy /xc /xn /xo $OriginalWavPath $RepackerFolderPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
-    ##########################
-    ######## Dubbing #########
-    ##########################
-    # Copy dubbed audio files from Dubbed folder to Repacker folder
-    $DubbedFileList = Get-ChildItem $CustomWavPath -Filter "*.wav" # Retrieve list of dubbed WAV files in Dubbed folder
+    ################################
+    ######## Customization #########
+    ################################
+    # Copy custom audio files from Custom folder to Repacker folder
+    $CustomFileList = Get-ChildItem $CustomWavPath -Filter "*.wav" # Retrieve list of custom WAV files in Custom folder
     $OriginalWavesList = Get-ChildItem $OriginalWavPath -Filter "*.wav" # Retrieve list of WAV files in Original folder
     $RepackerWavesList = Get-ChildItem $RepackerFolderPath -Filter "*.wav" # Retrieve list of WAV files in Repacker folder
-    $DubbedFilesSizeError = "DubbedFilesError-Size-tmp.txt" # Temporary files to store errors
-    $DubbedFilesNameError = "DubbedFilesError-Name-tmp.txt"
-    $DubbedFilesDateError = "DubbedFilesError-Date-tmp.txt"
-    ForEach ($DubbedFile in $DubbedFileList) {
-        if ($OriginalWavesList.Name.Contains($DubbedFile.Name)) {
-            # The dubbed file exists among the original ones
-            $ID = [uint32]($DubbedFile.Name.Split("_")[0]) # Take the ID (aka number of the file) as number (int32)
-            if ($DubbedFile.Length -le $OriginalWavesList[$ID - 1].Length) {
+    $CustomFilesSizeError = "Log-CustomFilesError-Size-tmp.txt" # Temporary files to store errors
+    $CustomFilesNameError = "Log-CustomFilesError-Name-tmp.txt"
+    $CustomFilesDateError = "Log-CustomFilesError-Date-tmp.txt"
+    ForEach ($CustomFile in $CustomFileList) {
+        if ($OriginalWavesList.Name.Contains($CustomFile.Name)) {
+            # The custom file exists among the original ones
+            $ID = [uint32]($CustomFile.Name.Split("_")[0]) # Take the ID (aka number of the file) as number (int32)
+            if ($CustomFile.Length -le $OriginalWavesList[$ID - 1].Length) {
                 # Use the ID to get the corresponding file in Repacker folder and compare file size
-                if (-not($DubbedFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
+                if (-not($CustomFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
                     # Files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
                     <# FOR OPTIMIZATION
-                    Write-HostInfo "Copying dubbed file $DubbedFile to Repacker folder $RepackerFolderPath..."
+                    Write-HostInfo "Copying custom file $CustomFile to Repacker folder $RepackerFolderPath..."
                     #>
-                    robocopy $CustomWavPath $RepackerFolderPath $DubbedFile.Name # Perform the copy and display a summary to the user
+                    robocopy $CustomWavPath $RepackerFolderPath $CustomFile.Name # Perform the copy and display a summary to the user
                 }
                 <# FOR OPTIMIZATION
                 else {
-                    Write-HostWarn -Text "File dubbed file $DubbedFile already copied."
-                    Write-HostInfo "Storing log to file $DubbedFilesDateError..."
-                    $DubbedFile.Name >> $DubbedFilesDateError
+                    Write-HostWarn -Text "Custom file $CustomFile already copied."
+                    Write-HostInfo "Storing log to file $CustomFilesDateError..."
+                    $CustomFile.Name >> $CustomFilesDateError
                     Write-HostInfo "The script will continue"
                     continue
                 }
                 #>
             }
             else {
-                $LengthDelta = $DubbedFile.Length - $OriginalWavesList[$ID - 1].Length # Size difference in byte
-                Write-HostWarn "The size of file $($DubbedFile.Name) is greater than the original one's by $LengthDelta byte."
-                Write-HostInfo "Storing log to file $DubbedFilesSizeError..."
-                $DubbedFile.Name >> $DubbedFilesSizeError
+                $LengthDelta = $CustomFile.Length - $OriginalWavesList[$ID - 1].Length # Size difference in byte
+                Write-HostWarn "The size of file $($CustomFile.Name) is greater than the original one's by $LengthDelta byte."
+                Write-HostInfo "Storing log to file $CustomFilesSizeError..."
+                $CustomFile.Name >> $CustomFilesSizeError
                 Write-HostInfo "The script will continue"
                 continue
             }
         }
         else {
-            Write-HostWarn "The dubbed file $($DubbedFile.Name) has a wrong name."
-            Write-HostInfo "Storing log to file $DubbedFilesNameError..."
-            $DubbedFile.Name >> $DubbedFilesNameError
+            Write-HostWarn "The custom file $($CustomFile.Name) has a wrong name."
+            Write-HostInfo "Storing log to file $CustomFilesNameError..."
+            $CustomFile.Name >> $CustomFilesNameError
             Write-HostInfo "The script will continue"
             continue
         }
     }
 
     ##### Clean and reorder files in error #####
-    $DubbedFilesSizeErrorFinal = "DubbedFilesError-Size.txt"
-    $DubbedFilesNameErrorFinal = "DubbedFilesError-Name.txt"
-    $DubbedFilesDateErrorFinal = "DubbedFilesError-Date.txt"
+    $DubbedFilesSizeErrorFinal = "Log-CustomFilesError-Size.txt"
+    $DubbedFilesNameErrorFinal = "Log-CustomFilesError-Name.txt"
+    $DubbedFilesDateErrorFinal = "Log-CustomFilesError-Date.txt"
 
-    if (Test-Path -Path $DubbedFilesSizeError) {
+    if (Test-Path -Path $CustomFilesSizeError) {
         # If tmp file exists, sort by name and make the list disting (unique)
-        Get-Content $DubbedFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
+        Get-Content $CustomFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
     }
-    if (Test-Path -Path $DubbedFilesNameError) {
-        Get-Content $DubbedFilesNameError | Sort-Object | Get-Unique > $DubbedFilesNameErrorFinal
+    if (Test-Path -Path $CustomFilesNameError) {
+        Get-Content $CustomFilesNameError | Sort-Object | Get-Unique > $DubbedFilesNameErrorFinal
     }
-    if (Test-Path -Path $DubbedFilesDateError) {
-        Get-Content $DubbedFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
+    if (Test-Path -Path $CustomFilesDateError) {
+        Get-Content $CustomFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
     }
 
     # Display to the user how to use error log files
@@ -135,15 +135,15 @@ function Add-AllCustomSoundFiles {
     `tCheck $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
 
     # Work clean
-    if (Test-Path -Path $DubbedFilesSizeError) {
+    if (Test-Path -Path $CustomFilesSizeError) {
         # If tmp file exists, delete it
-        Remove-Item $DubbedFilesSizeError
+        Remove-Item $CustomFilesSizeError
     }
-    if (Test-Path -Path $DubbedFilesNameError) {
-        Remove-Item $DubbedFilesNameError
+    if (Test-Path -Path $CustomFilesNameError) {
+        Remove-Item $CustomFilesNameError
     }
-    if (Test-Path -Path $DubbedFilesDateError) {
-        Remove-Item $DubbedFilesDateError
+    if (Test-Path -Path $CustomFilesDateError) {
+        Remove-Item $CustomFilesDateError
     }
 
     ##########################
