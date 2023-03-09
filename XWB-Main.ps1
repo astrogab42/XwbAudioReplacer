@@ -121,18 +121,17 @@ function Add-AllCustomSoundFiles {
     if (Test-Path -Path $CustomFilesSizeError) {
         # If tmp file exists, sort by name and make the list disting (unique)
         Get-Content $CustomFilesSizeError | Sort-Object | Get-Unique > $DubbedFilesSizeErrorFinal
+        # Display to the user how to use error log files
+        Write-HostWarn -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size."
     }
     if (Test-Path -Path $CustomFilesNameError) {
         Get-Content $CustomFilesNameError | Sort-Object | Get-Unique > $DubbedFilesNameErrorFinal
+        Write-HostWarn -Text "Check $DubbedFilesNameErrorFinal for files with wrong name."
     }
     if (Test-Path -Path $CustomFilesDateError) {
         Get-Content $CustomFilesDateError | Sort-Object | Get-Unique > $DubbedFilesDateErrorFinal
+        Write-HostWarn -Text "Check $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
     }
-
-    # Display to the user how to use error log files
-    Write-HostInfo -Text "Check $DubbedFilesSizeErrorFinal for files with wrong size.
-    `tCheck $DubbedFilesNameErrorFinal for files with wrong name.
-    `tCheck $DubbedFilesDateErrorFinal for files already copied, with the same last-write date."
 
     # Work clean
     if (Test-Path -Path $CustomFilesSizeError) {
