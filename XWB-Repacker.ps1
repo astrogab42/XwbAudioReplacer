@@ -3,7 +3,7 @@ $DebugMode = $true
 
 Clear-Host
 
-Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
+Write-Host "Welcome to XwbAudioReplacer!" -ForegroundColor blue
 
 # Include external functions
 . ".\XWB-Tools.ps1"
@@ -39,13 +39,13 @@ public class GPSTools
 ##### Initialization #####
 ##########################
 $Header = "header.bin"
-$CacheFolderPath = ".\cache"
+$CacheFolderPath = ".\`Cache"
 
 ##########################
 ##### Configuration ######
 ##########################
 # Get and store configuration in config file
-$ConfigFile = ".\xwbrepacker.config" # config file
+$ConfigFile = ".\XwbAudioReplacer.config" # config file
 # Check config file existance
 if (-not(Test-Path -Path $ConfigFile -PathType Leaf)) {
     # If the file does not exist, create it.

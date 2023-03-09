@@ -109,7 +109,7 @@ function Show-Config {
 
     Clear-Host
 
-    Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
+    Write-Host "Welcome to XwbAudioReplacer!" -ForegroundColor blue
     
     # Show config to user
     Write-HostInfo -Text "This is your current configuration:"
