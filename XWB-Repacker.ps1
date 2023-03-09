@@ -39,7 +39,7 @@ public class GPSTools
 ##### Initialization #####
 ##########################
 $Header = "header.bin"
-$CacheFolderPath = ".\`Cache"
+$CacheFolderPath = ".\Cache"
 
 ##########################
 ##### Configuration ######
