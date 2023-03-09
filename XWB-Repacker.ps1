@@ -1,14 +1,5 @@
 ##### DEBUG MODE #####
-$DebugMode = $true
-
-Clear-Host
-
-Write-Host "Welcome to XwbAudioReplacer!" -ForegroundColor blue
-
-# Include external functions
-. ".\XWB-Tools.ps1"
-. ".\XWB-Configuration.ps1"
-. ".\XWB-Main.ps1"
+$DebugMode = $false
 
 ##### .NET code #####
 # replace data in file as byte stream
@@ -38,7 +29,17 @@ public class GPSTools
 ##########################
 ##### Initialization #####
 ##########################
+# Organization subfolder
+$Subfolder = "Tools"
+# Include external functions
+. ".\$Subfolder\XWB-Tools.ps1"
+. ".\$Subfolder\XWB-Configuration.ps1"
+. ".\$Subfolder\XWB-Main.ps1"
+# Welcome Message
+Set-WelcomeMessage -ScriptName "XWB-Repacker"
+# Header
 $Header = "header.bin"
+# Cache
 $CacheFolderPath = ".\Cache"
 
 ##########################
