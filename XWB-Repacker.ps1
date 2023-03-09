@@ -36,7 +36,7 @@ public class GPSTools
 ##### Initialization #####
 ##########################
 $Header = "header.bin"
-$RepackerFolderPath = ".\RepackerFolder"
+$CacheFolderPath = ".\cache"
 
 ##########################
 ##### Configuration ######
@@ -145,19 +145,19 @@ do {
         ##################################################
         ########### Add all custom sound files ###########
         ##################################################
-        0 { Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame}
+        0 { Add-AllCustomSoundFiles -XwbPath $XwbPath -CacheFolderPath $CacheFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame}
 
         ######################################################
         ########### Synchronise custom audio files ###########
         ######################################################
         1 { 
-            if (Test-Path -Path $RepackerFolderPath) {
-                Write-HostInfo -Text "Deleting Repacker folder: $RepackerFolderPath..."
-                Remove-Item $RepackerFolderPath -Recurse -Force
+            if (Test-Path -Path $CacheFolderPath) {
+                Write-HostInfo -Text "Deleting Repacker folder: $CacheFolderPath..."
+                Remove-Item $CacheFolderPath -Recurse -Force
             }
             
             # Run MAIN
-            Add-AllCustomSoundFiles -XwbPath $XwbPath -RepackerFolderPath $RepackerFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame
+            Add-AllCustomSoundFiles -XwbPath $XwbPath -CacheFolderPath $CacheFolderPath -OriginalWavPath $OriginalWavPath -CustomWavPath $CustomWavPath -XwbName $XwbName -Header $Header -GameAudioPath $GameAudioPath -GameName $GameName -GameExePath $GameExePath -RunGame $RunGame
         }
 
         ##########################################
@@ -239,9 +239,9 @@ do {
         ###### Delete Cache ######
         ##########################
         4 {
-            if (Test-Path -Path $RepackerFolderPath) {
-                Write-HostInfo -Text "Deleting Repacker folder: $RepackerFolderPath..."
-                Remove-Item $RepackerFolderPath -Recurse -Force
+            if (Test-Path -Path $CacheFolderPath) {
+                Write-HostInfo -Text "Deleting cache folder: $CacheFolderPath..."
+                Remove-Item $CacheFolderPath -Recurse -Force
             }
 
             exit
