@@ -1,3 +1,6 @@
+##### DEBUG MODE #####
+$DebugMode = $true
+
 Clear-Host
 
 Write-Host "Welcome to XWB-Repacker!" -ForegroundColor blue
@@ -46,13 +49,13 @@ $ConfigFile = ".\xwbrepacker.config" # config file
 # Check config file existance
 if (-not(Test-Path -Path $ConfigFile -PathType Leaf)) {
     # If the file does not exist, create it.
-    Write-HostInfo -Text "The config file $ConfigFile does not exists. Creating..."
+    if ($DebugMode) { Write-HostInfo -Text "The config file $ConfigFile does not exists. Creating..." }
     New-Item -ItemType File -Path $ConfigFile -Force -ErrorAction Stop | Out-Null # Create new item
     Set-Configuration -ConfigFile $ConfigFile # Get and store configuration in config file
 }
 else {
     # If the file already exists, show the message and do nothing
-    Write-HostInfo -Text "The config file already exists."
+    if ($DebugMode) { Write-HostInfo -Text "The config file already exists." }
 }
 
 ##### Store current configuration in variables for this script #####
@@ -113,7 +116,7 @@ if ($GameName -match '\.exe$') {
     $GameProcess = Get-Process -Name ($GameName.Split('.exe')[-2]) -ErrorAction SilentlyContinue
     if ($GameProcess) {
         # If the game is running, close it
-        Write-HostWarn -Text "There is a process $GameName in background. Killing process..."
+        if ($DebugMode) { Write-HostWarn -Text "There is a process $GameName in background. Killing process..." }
         $GameProcess | Stop-Process -Force # No mercy if you mess with game files.
     }
 }
@@ -152,7 +155,7 @@ do {
         ######################################################
         1 { 
             if (Test-Path -Path $CacheFolderPath) {
-                Write-HostInfo -Text "Deleting Repacker folder: $CacheFolderPath..."
+                if ($DebugMode) { Write-HostInfo -Text "Deleting Cache folder: $CacheFolderPath..." }
                 Remove-Item $CacheFolderPath -Recurse -Force
             }
             
@@ -226,11 +229,11 @@ do {
             
             if ($RunGame) {
                 # Run the game only if it is set so in the configuration
-                Write-HostInfo -Text $GameName" is starting..."
+                if ($DebugMode) { Write-HostInfo -Text $GameName" is starting..." }
                 Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
             }
             else {
-                Write-HostInfo -Text "You chose not to start $GameName. Exiting..."
+                if ($DebugMode) { Write-HostInfo -Text "You chose not to start $GameName. Exiting..." }
                 exit
             }
         }
@@ -240,8 +243,9 @@ do {
         ##########################
         4 {
             if (Test-Path -Path $CacheFolderPath) {
-                Write-HostInfo -Text "Deleting cache folder: $CacheFolderPath..."
+                if ($DebugMode) { Write-HostInfo -Text "Deleting Cache folder: $CacheFolderPath..." }
                 Remove-Item $CacheFolderPath -Recurse -Force
+                Write-HostInfo -Text "Cache folder deleted."
             }
 
             exit

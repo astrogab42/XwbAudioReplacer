@@ -26,12 +26,12 @@ function Add-AllCustomSoundFiles {
     # Tool version, aka dwVersion / XACT_CONTENT_VERSION
     $DwVersionBytePosition = [uint32]"0x08" # Byte at position 0x08 (see Documentation)
     $DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition
-    Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion"
+    if ($DebugMode) { Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" }
 
     # File format, aka dwHeaderVersion
     $DwHeaderVersionBytePosition = [uint32]"0x04" # Byte at position 0x04 (see Documentation)
     $DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition
-    Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion"
+    if ($DebugMode) { Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion" }
 
     <# DEPRECATED
     # Timestamp
@@ -42,14 +42,14 @@ function Add-AllCustomSoundFiles {
     #>
 
     ##### Preparation for xwb file built #####
-    # Repacker Folder (see Documentation)
+    # Cache Folder (see Documentation)
     if (-not(Test-Path -Path $CacheFolderPath)) {
-        # Create Repacker folder if it does not exist
-        Write-HostInfo -Text "Creating cache folder: $CacheFolderPath..."
+        # Create Cache folder if it does not exist
+        if ($DebugMode) { Write-HostInfo -Text "Creating cache folder: $CacheFolderPath..." }
         New-Item $CacheFolderPath -ItemType Directory | Out-Null
     }
     else {
-        Write-HostInfo -Text "Repacker Folder exists."
+        if ($DebugMode) { Write-HostInfo -Text "Cache Folder exists." }
     }
 
 
@@ -58,14 +58,14 @@ function Add-AllCustomSoundFiles {
     Write-HostInfo -Text "Custom Folder: $CustomWavPath. This folder contains the WAV files that has been customized."
     Write-HostInfo -Text "Cache Folder: $CacheFolderPath. This folder contains the WAV files (original and/or custom) that will be packed into the new XWB file."
 
-    # Copy of original WAV files in Repacker folder
-    Write-HostInfo -Text "Construction of cache folder: $CacheFolderPath with Robocopy..."
+    # Copy of original WAV files in Cache folder
+    if ($DebugMode) { Write-HostInfo -Text "Construction of Cache folder: $CacheFolderPath with Robocopy..." }
     robocopy /xc /xn /xo $OriginalWavPath $CacheFolderPath /if *.wav | Out-Null # Flags: /xc (eXclude Changed files) /xn (eXclude Newer files) /xo (eXclude Older files) /if (Include the following Files)
 
     ################################
     ######## Customization #########
     ################################
-    # Copy custom audio files from Custom folder to Repacker folder
+    # Copy custom audio files from Custom folder to Cache folder
     $CustomFileList = Get-ChildItem $CustomWavPath -Filter "*.wav" # Retrieve list of custom WAV files in Custom folder
     $OriginalWavesList = Get-ChildItem $OriginalWavPath -Filter "*.wav" # Retrieve list of WAV files in Original folder
     $RepackerWavesList = Get-ChildItem $CacheFolderPath -Filter "*.wav" # Retrieve list of WAV files in cache folder
@@ -77,11 +77,11 @@ function Add-AllCustomSoundFiles {
             # The custom file exists among the original ones
             $ID = [uint32]($CustomFile.Name.Split("_")[0]) # Take the ID (aka number of the file) as number (int32)
             if ($CustomFile.Length -le $OriginalWavesList[$ID - 1].Length) {
-                # Use the ID to get the corresponding file in Repacker folder and compare file size
+                # Use the ID to get the corresponding file in Cache folder and compare file size
                 if (-not($CustomFile.LastWriteTime -eq $OriginalWavesList[$ID - 1].LastWriteTime)) {
                     # Files do not have the same LastWriteDate, i.e. they are not the same file (optimization check)
                     <# FOR OPTIMIZATION
-                    Write-HostInfo "Copying custom file $CustomFile to Repacker folder $CacheFolderPath..."
+                    Write-HostInfo "Copying custom file $CustomFile to Cache folder $CacheFolderPath..."
                     #>
                     robocopy $CustomWavPath $CacheFolderPath $CustomFile.Name # Perform the copy and display a summary to the user
                 }
@@ -97,18 +97,18 @@ function Add-AllCustomSoundFiles {
             }
             else {
                 $LengthDelta = $CustomFile.Length - $OriginalWavesList[$ID - 1].Length # Size difference in byte
-                Write-HostWarn "The size of file $($CustomFile.Name) is greater than the original one's by $LengthDelta byte."
-                Write-HostInfo "Storing log to file $CustomFilesSizeError..."
+                if ($DebugMode) { Write-HostWarn "The size of file $($CustomFile.Name) is greater than the original one's by $LengthDelta byte." }
+                if ($DebugMode) { Write-HostInfo "Storing log to file $CustomFilesSizeError..." }
                 $CustomFile.Name >> $CustomFilesSizeError
-                Write-HostInfo "The script will continue"
+                if ($DebugMode) { Write-HostInfo "The script will continue" }
                 continue
             }
         }
         else {
-            Write-HostWarn "The custom file $($CustomFile.Name) has a wrong name."
-            Write-HostInfo "Storing log to file $CustomFilesNameError..."
+            if ($DebugMode) { Write-HostWarn "The custom file $($CustomFile.Name) has a wrong name." }
+            if ($DebugMode) { Write-HostInfo "Storing log to file $CustomFilesNameError..." }
             $CustomFile.Name >> $CustomFilesNameError
-            Write-HostInfo "The script will continue"
+            if ($DebugMode) { Write-HostInfo "The script will continue" }
             continue
         }
     }
@@ -156,8 +156,8 @@ function Add-AllCustomSoundFiles {
     $NumberOfFileElaboratedByXwbTool = $buildXWB.Length - $XwbToolOutputLogHeadLinesNumber - $XwbToolOutputLogTailLinesNumber
     $NumberOfFilesInCacheFolder = $RepackerWavesList.Length
     if ($NumberOfFileElaboratedByXwbTool -lt $NumberOfFilesInCacheFolder) {
-        # In case we have less files elaborated by XwbTool w.r.t. the number of WAV files in Repacker Folder
-        Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Repacker Folder contains $NumberOfFilesInCacheFolder files!"
+        # In case we have less files elaborated by XwbTool w.r.t. the number of WAV files in Cache Folder
+        Write-HostError "XwbTool elaborated $NumberOfFileElaboratedByXwbTool files, whilst the Cache Folder contains $NumberOfFilesInCacheFolder files!"
         Write-HostError "Fatal Error! Exiting..."
         exit
     }
@@ -179,11 +179,11 @@ function Add-AllCustomSoundFiles {
     if (-not(Test-Path -Path $GameAudioPath"\"$XwbName".original" -PathType Leaf)) {
         # Create a backup of the original XWB file (adding ".original" at the end of the filename) if not already done
         Rename-Item -Path $GameAudioPath"\"$XwbName -NewName $XwbName".original"
-        Write-HostInfo -Text "File $XwbName (assumed to be The Original) renamed in $XwbName.original."
+        if ($DebugMode) { Write-HostInfo -Text "File $XwbName (assumed to be The Original) renamed in $XwbName.original." }
     }
     else {
             # If the backup of the original XWB file already exists, show the message and do nothing
-            Write-HostInfo -Text "File $XwbName.original NOT created because it already exists."
+            if ($DebugMode) { Write-HostInfo -Text "File $XwbName.original NOT created because it already exists." }
     }
     Move-Item -Path $XwbName -Destination $GameAudioPath -Force # Copy rebuilt XWB file to game folder
 
@@ -195,7 +195,7 @@ function Add-AllCustomSoundFiles {
         Start-Process -FilePath $GameExePath -WorkingDirectory "C:\GOG Games\Monkey Island 1 SE" -Wait
     }
     else {
-        Write-HostInfo -Text "You chose not to start $GameName."
+        if ($DebugMode) { Write-HostInfo -Text "You chose not to start $GameName." }
     }
 
 }
