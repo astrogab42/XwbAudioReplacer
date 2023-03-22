@@ -1,10 +1,10 @@
-﻿Clear-Host
-
-Write-Host "Welcome to XWB-Extractor!" -ForegroundColor blue
-
-##### INITIALIZATION #####
+﻿##### INITIALIZATION #####
+# Organization subfolder
+$Subfolder = "Tools"
 # Include external functions
-. ".\XWB-Tools.ps1"
+. ".\$Subfolder\XWB-Tools.ps1"
+# Welcome Message
+Set-WelcomeMessage -ScriptName "XWB-Extractor"
 
 ##### CONFIGURATION #####
 # XWB File

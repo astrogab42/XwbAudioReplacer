@@ -9,8 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-xwbrepacker*.config
-RepackerFolder
+XwbAudioReplacer*.config
+Cache
 *.xwb
 *.wav
 Log-CustomFilesError-*.txt

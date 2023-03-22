@@ -109,7 +109,8 @@ function Show-Config {
 
     Clear-Host
 
-    Write-Host "Welcome to XwbAudioReplacer!" -ForegroundColor blue
+    # Welcome Message
+    Set-WelcomeMessage -ScriptName "XWB-Extractor"
     
     # Show config to user
     Write-HostInfo -Text "This is your current configuration:"

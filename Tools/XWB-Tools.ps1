@@ -2,6 +2,16 @@
 ######## Tool Functions #######
 ###############################
 
+# Welcome message
+function Set-WelcomeMessage {
+    param (
+        $ScriptName
+    )
+    Clear-Host
+    Write-Host "Welcome to $ScriptName of the XwbAudioReplacer Project!" -ForegroundColor blue
+    Write-Host "Credits -> Think: Steve2811 | Create: astrogab42 | Support: Piero-93" -ForegroundColor green
+}
+
 # Basic logging
 function Write-HostError {
     param (
