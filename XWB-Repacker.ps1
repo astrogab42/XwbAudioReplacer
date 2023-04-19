@@ -136,12 +136,12 @@ do {
     $TitleMainMenu = ""
     $MessageMainMenu = "Make your choice:"
     $OptionsMainMenu = @(
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Add all custom sound files", "Upload all WAV files in the custom files folder to the game. Use whenever you add or edit a WAV file to the custom files folder.")
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Synchronise custom audio files", "Loads all custom audio files currently in the custom files folder into the game and restores the original version for all other WAV files. Use this function if you wish to remove previously loaded custom sound files from the game that are no longer present in the custom sound files folder.")
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Edit configuration", "Use this function if you want to change the script's working folders and decide whether or not to start the game after execution.")
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Restore the original XWB file", "Restores the original XWB file created by the game developers. To be used in case something goes wrong and the game no longer starts.")
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Delete Cache", "Delete the temporary files of this script. No user file will be deleted. Use this function at the end of use or when you want to archive this script on disk while occupying as few space as possible.")
-        [System.Management.Automation.Host.ChoiceDescription]::new("&Terminate script", "Exit the script.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&1 - Add all custom sound files", "Upload all WAV files in the custom files folder to the game. Use whenever you add or edit a WAV file to the custom files folder.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&2 - Synchronise custom audio files", "Loads all custom audio files currently in the custom files folder into the game and restores the original version for all other WAV files. Use this function if you wish to remove previously loaded custom sound files from the game that are no longer present in the custom sound files folder.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&3 - Edit configuration", "Use this function if you want to change the script's working folders and decide whether or not to start the game after execution.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&4 - Restore the original XWB file", "Restores the original XWB file created by the game developers. To be used in case something goes wrong and the game no longer starts.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&5 - Delete Cache", "Delete the temporary files of this script. No user file will be deleted. Use this function at the end of use or when you want to archive this script on disk while occupying as few space as possible.")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&Quit", "Exit the script.")
         )
     $DefaultMainMenu = 0
     $ResponseMainMenu = $Host.UI.PromptForChoice($TitleMainMenu, $MessageMainMenu, $OptionsMainMenu, $DefaultMainMenu)
@@ -177,11 +177,11 @@ do {
             $MessageConfMenu = "Choose the ID you want to change"
             $OptionsConfMenu = @(
                 [System.Management.Automation.Host.ChoiceDescription]::new("&Back to main menu", "Exit from change configuration mode.")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&OriginalWavPath", "The path containing the WAV files extracted from the XWB file with XWBExtractor.ps1")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&CustomWavPath", "The path that will contain the user's audio files")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&XwbPath", "The path to the XWB file inside the game folder")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&GameExePath", "The path to the exe file of the game launcher")
-                [System.Management.Automation.Host.ChoiceDescription]::new("&RunGame", "Whether or not to run the game")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&1 - OriginalWavPath", "The path containing the WAV files extracted from the XWB file with XWBExtractor.ps1")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&2 - CustomWavPath", "The path that will contain the user's audio files")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&3 - XwbPath", "The path to the XWB file inside the game folder")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&4 - GameExePath", "The path to the exe file of the game launcher")
+                [System.Management.Automation.Host.ChoiceDescription]::new("&5 - RunGame", "Whether or not to run the game")
             )        
             $DefaultConfMenu = 0  # 0=Cancel
     
