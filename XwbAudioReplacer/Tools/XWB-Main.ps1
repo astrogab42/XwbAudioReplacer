@@ -23,15 +23,53 @@ function Add-AllCustomSoundFiles {
     $ByteStreamLimit = 150 # Limit the number of bytes to speed up the process
     $XwbHeader = Get-Content $XwbPath -AsByteStream -TotalCount $ByteStreamLimit # Get content of XWB file as stream of bytes (limit to $ByteStreamLimit)
 
+    # Allowed versions
+    $DwAndDwHeaderVersionsAllowed = @( @(42,42), @(43,42), @(44,42), @(45,43), @(46,44) ) # Allowed coupled values
+
     # Tool version, aka dwVersion / XACT_CONTENT_VERSION
     $DwVersionBytePosition = [uint32]"0x08" # Byte at position 0x08 (see Documentation)
-    $DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition
-    if ($DebugMode) { Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" }
+    $DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition #45
+    if ($DwVersion -is [int] -or $var -is [double]) {
+        # Check if the extracted value is numeric
+        if ($DebugMode) { Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" }
+    } else {
+        Write-HostError -Text "Tool version, aka dwVersion / XACT_CONTENT_VERSION, is not numeric. The file $XwbName could be corrupted."
+        Write-HostError "Fatal Error! Exiting..."
+        exit
+    }
 
     # File format, aka dwHeaderVersion
     $DwHeaderVersionBytePosition = [uint32]"0x04" # Byte at position 0x04 (see Documentation)
-    $DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition
-    if ($DebugMode) { Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion" }
+    $DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition #43
+    if ($DwVersion -is [int] -or $var -is [double]) {
+        # Check if the extracted value is numeric
+        if ($DebugMode) { Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion" }
+    } else {
+        Write-HostError -Text "File format, aka dwHeaderVersion, is not numeric. The file $XwbName could be corrupted."
+        Write-HostError "Fatal Error! Exiting..."
+        exit
+    }
+
+    $DwAndDwHeaderVersionCouple = @($DwVersion,$DwHeaderVersion)
+    if ($DwAndDwHeaderVersionsAllowed -notcontains $DwAndDwHeaderVersionCouple) { 
+        # The versions retrieved from the header of the provided XWB files are not an allowed couple
+        Write-HostError -Text "Tool version, aka dwVersion / XACT_CONTENT_VERSION, and File format, aka dwHeaderVersion, are not recognised."
+        do {
+            $TitleWrongVersionMenu = ""
+            $MessageWrongVersionMenu = "Do you want to continue? (Y/N)"
+            $OptionsWrongVersionMenu = @(
+            [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "The script will continue, but there is a probability of high unsuccessful results due to the previous errors.")
+            [System.Management.Automation.Host.ChoiceDescription]::new("&No", "The script will stop.")
+            )
+            $DefaultWrongVersionMenu = 0
+            $ResponseWrongVersionMenu = $Host.UI.PromptForChoice($TitleWrongVersionMenu, $MessageWrongVersionMenu, $OptionsWrongVersionMenu, $DefaultWrongVersionMenu)
+            switch ($ResponseWrongVersionMenu) {
+                1 { continue }
+                0 { exit }
+            }
+        } until ($ResponseWrongVersionMenu -eq $DefaultWrongVersionMenu)
+    }
+
 
     <# DEPRECATED
     # Timestamp
