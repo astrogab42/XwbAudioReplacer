@@ -29,12 +29,10 @@ public class GPSTools
 ##########################
 ##### Initialization #####
 ##########################
-# Organization subfolder
-$Subfolder = "Tools"
 # Include external functions
-. ".\$Subfolder\XWB-Tools.ps1"
-. ".\$Subfolder\XWB-Configuration.ps1"
-. ".\$Subfolder\XWB-Main.ps1"
+. (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'XWB-Tools.ps1' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative")
+. (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'XWB-Configuration.ps1' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative")
+. (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'XWB-Main.ps1' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative")
 # Welcome Message
 Set-WelcomeMessage -ScriptName "XWB-Repacker"
 # Header

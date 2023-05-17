@@ -1,8 +1,6 @@
 ﻿##### INITIALIZATION #####
-# Organization subfolder
-$Subfolder = "Tools"
 # Include external functions
-. ".\$Subfolder\XWB-Tools.ps1"
+. (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'XWB-Tools.ps1' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative")
 # Welcome Message
 Set-WelcomeMessage -ScriptName "XWB-Extractor"
 
