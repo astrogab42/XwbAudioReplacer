@@ -42,11 +42,10 @@ if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     Write-HostInfo -Text "Hint! Remember that you can use option R in XWB-Reparcker to restore the original XWB file"
     exit
 }
-exit
 ##### MAIN #####
 # extract wav from xwb
 Write-HostInfo "Extracting WAV files from XWB file"
-.\towav.exe $xwbInputFile | Out-Null
+& (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'towav.exe' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative") $xwbInputFile | Out-Null
 Write-HostInfo "Moving WAV files to destination folder $wavOutputFolder"
 Move-Item *.wav $wavOutputFolder
 
@@ -76,3 +75,4 @@ ForEach ($thisFile in $fileList.Name) {
         }
     }
 }
+Write-HostInfo -Text "Extraction completed!"
