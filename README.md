@@ -8,7 +8,7 @@
 
 We decided to provide the user a "few-click" solution to handle the tools, say the scripts. In the root folder the two bat launcher “XWB-Extractor-Launcher.bat” and “XWB-Repacker-Launcher.bat”. They are simple solutions to run the scripts located in the inner folders.
 
-### STEP 1 - "XWBExtractor.ps1": EXTRACT WAV FILES FROM XWB FILE
+### STEP 1 - EXTRACTOR: EXTRACT WAV FILES FROM XWB FILE - XWB-Extractor-Launcher.bat
 
 Within the installation folder of the game, locate the XWB file (containing the WAV files) and copy its path. Then start the script XWBExtractor.ps1 and enter:
 
@@ -22,7 +22,7 @@ The size in bits of custom files must be less than or equal to the original coun
 User custom files shall have the same name as the original WAV files extracted from the XWB file.
 The user folder does not have to contain all original audio files: if a custom audio file is not present, "XWBRepacker.ps1" will use the original audio file.
 
-### STEP 3 - "XWBRepacker.ps1": CREATION OF NEW XWB FILE
+### STEP 3 - REPACKER: CREATION OF NEW XWB FILE - XWB-Repacker-Launcher.bat
 
 The first time the script is started, you will be asked to configure it. This configuration includes:
 
