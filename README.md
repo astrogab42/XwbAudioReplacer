@@ -1,14 +1,14 @@
 ## XWB-AudioReplacer
 
-### INTRODUCTION
+# INTRODUCTION
 
 “XWBExtractor.ps1” and “XWBRepacker.ps1” are Powershell scripts that make possible to replace audio files of games using XATC WaveBanks (XWB), file with XWB extension that contain game sounds, music or voicelines. The XWB file is created by the game developers with the DirectX SDK tool called "Cross-platform Audio Creation Tool" (a.k.a. XACT). Thanks to the scripts in this GitHub project, users can replace original audio files with their own ones, such as music, sounds or voicelines in the game. The scripts have been  tested with 'The Secret of Monkey Island: Special Edition', but we did our best to make them compatible with all the other older games that use XWB files. This script required months of reverse engineering, programming, documentation and study of 3 Italian Engineers. The essential information for the realisation of these scripts was in part very difficult to be found online and in part discovered directly by our team, since it was not present online at all. If you would like to support us and the project, please consider a donation at the following link: https://www.paypal.com/donate/?hosted_button_id=GRRUY4KGSLFPA.
 
-### Bat script launcher files
+# BAT script launcher files
 
 We decided to provide users with a “few-click” solution to handle the tools, say the scripts. In the root folder, the two *bat* launchers “XWB-Extractor-Launcher.bat” and “XWB-Repacker-Launcher.bat” can be found. They are simple solutions to run the scripts located in the inner folders.
 
-### EXTRACTOR
+# EXTRACTOR
 ## EXTRACT WAV FILES FROM XWB FILE
 
 Within the installation folder of the game, locate the XWB file (containing the WAV files) and copy its full path. Then run the launcher *XWB-Extractor-Launcher.bat* and enter:
@@ -16,7 +16,7 @@ Within the installation folder of the game, locate the XWB file (containing the 
 *   the path to the XWB file in the game folder containing the WAV files to be extracted;
 *   the path to the folder that will contain the extracted WAV files.
 
-### REPACKER
+# REPACKER
 ## STEP 1 - PREPARING THE NEW WAV FILES
 
 Create or prepare your own custom WAV files, whether sound, music, or voicelines and place them together in a folder.
@@ -25,7 +25,7 @@ User custom files SHALL have the same name as the original WAV files extracted f
 The user folder does not need to contain all original audio files: if a custom audio file is not present, the REPACKER will use the original audio file.
 
 ## STEP 2 - CREATION OF THE NEW XWB FILE
-# CONFIGURATION
+### CONFIGURATION
 The first time the REPACKER script is started, you will be asked to configure it. This configuration includes:
 
 - *OriginalWavPath*: the path containing the WAV files extracted from the XWB file with the EXTRACTOR;
@@ -34,7 +34,7 @@ The first time the REPACKER script is started, you will be asked to configure it
 - *GameExePath*: the path to the exe file of the game launcher;
 - *RunGame = True/False*: toggle (not) to run the game after the execution of the script.
 
-# FEATURES
+### FEATURES
 Then the REPACKER script will show a menu with 4 choices:
 
 - *1. Add all custom audio files.* - Pack and push in the game all the custom WAV files. Use whenever you add or edit a WAV file to the custom file folder.
@@ -44,11 +44,11 @@ Then the REPACKER script will show a menu with 4 choices:
 - *5. Restore the original XWB file.* - Restores the original XWB file created by the game developers. To be used in case something goes wrong and, for example, the game starts no longer.
 - *Q. Quit from the script.* - Exit and quit.
 
-### CONCLUSIONS
+# CONCLUSIONS
 
 The game should now start with the new audio files. We donate this script to the community so that anyone with little technical skills can customise their favourite games by inserting their own music, sounds, or recording all voicelines in their own language.
 
-### NOTES FOR THE COMMUNITY
+# NOTES FOR THE COMMUNITY
 As reported above, at the moment the script only allows the use of audio files with a byte size less than or equal to that of the original audio file. If desired, this limitation can be removed by rebuilding the XSB file. We leave this information here for our or the community's future developments.
 
 *Credits -> Think: Steve2811 | Create: astrogab42 | Support: Piero-93*
