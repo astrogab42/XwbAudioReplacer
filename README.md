@@ -4,7 +4,7 @@
 
 “XWBExtractor.ps1” and “XWBRepacker.ps1” are Powershell scripts that make possible to replace audio files of games using XACT WaveBanks (XWB), file with XWB extension that contain game sounds, music or voicelines. The XWB file is created by the game developers with the DirectX SDK tool called "Cross-platform Audio Creation Tool" (a.k.a. XACT). Thanks to the scripts in this GitHub project, users can replace original audio files with their own ones, such as music, sounds or voicelines in the game. The scripts have been  tested with 'The Secret of Monkey Island: Special Edition', but we did our best to make them compatible with all the other older games that use XWB files. This script required months of reverse engineering, programming, documentation and study of 3 Italian Engineers. The essential information for the realisation of these scripts was in part very difficult to be found online and in part discovered directly by our team, since it was not present online at all. If you would like to support us and the project, please consider a donation at the following link: https://www.paypal.com/donate/?hosted_button_id=GRRUY4KGSLFPA.
 
-## EXTRACTOR
+## XWB-EXTRACTOR
 ### EXTRACTING WAV FILES FROM XWB FILE
 
 The script allows you to extract the WAV files from the XWB file contained in the game installation folder.
@@ -13,7 +13,7 @@ Within the installation folder of the game, locate the XWB file (containing the 
 *   the path to the XWB file in the game folder containing the WAV files to be extracted;
 *   the path to the folder that will contain the extracted WAV files.
 
-## REPACKER
+## XWB-REPACKER
 
 The script allows you to insert your own audio files into the game.
 
