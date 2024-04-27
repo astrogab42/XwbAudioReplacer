@@ -15,6 +15,7 @@ Cache
 *.wav
 Log-CustomFilesError-*.txt
 xwbrepacker.config
+XWB Extractor.exe
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
