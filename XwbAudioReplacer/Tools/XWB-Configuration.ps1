@@ -110,7 +110,7 @@ function Show-Config {
     Clear-Host
 
     # Welcome Message
-    Set-WelcomeMessage -ScriptName "XWB-Extractor"
+    Set-WelcomeMessage -ScriptName "XWB-Repacker"
     
     # Show config to user
     Write-HostInfo -Text "This is your current configuration:"
