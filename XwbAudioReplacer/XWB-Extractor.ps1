@@ -6,7 +6,7 @@ Set-WelcomeMessage -ScriptName "XWB-Extractor"
 
 ##### CONFIGURATION #####
 # XWB File
-Write-HostInfo -Text "Let me know the XWB file you want to extract."
+Write-HostInfo -Text "Provide the XWB file you want to extract."
 $xwbInputFile = (Read-Host "Please, enter the path to the XWB file").Replace("`"", "") # Prompt user to insert new value from keyboard
 #$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
 $Output = Assert-FileExists -File $xwbInputFile
@@ -15,7 +15,7 @@ if (-not($Output)) {
 }
 
 # Destination folder for extraction
-Write-HostInfo -Text "Now, let me know the folder where you want me to save the extracted WAV files. The folder MUST be empty."
+Write-HostInfo -Text "Now, provide the folder where you want to save the extracted WAV files. The folder MUST be empty."
 $wavOutputFolder = (Read-Host "Please, enter the path to the folder where to extract the wav files").Replace("`"", "") # Prompt user to insert new value from keyboard
 #$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 $Output = Assert-FolderExists -Folder $wavOutputFolder
