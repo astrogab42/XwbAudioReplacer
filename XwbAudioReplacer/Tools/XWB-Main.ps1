@@ -45,7 +45,7 @@ function Add-AllCustomSoundFiles {
     # Create version couple
     $DwAndDwHeaderVersionCouple = @($DwHeaderVersion,$DwVersion)
    
-    # Allowed versions
+    # Known Dw and DwHeader versions
     $DwAndDwHeaderVersionsAllowed = @( @(42,42), @(43,42), @(44,42), @(45,43), @(46,44) ) # Allowed coupled values
     $DwVersionCoupleAllowed = $false
     foreach ($versionPair in $DwAndDwHeaderVersionsAllowed) {
@@ -54,15 +54,15 @@ function Add-AllCustomSoundFiles {
         if ($versionPair[0] -eq $DwAndDwHeaderVersionCouple[0] -and $versionPair[1] -eq $DwAndDwHeaderVersionCouple[1]) {
             if ($DebugMode) {
 
-                Write-HostInfo -Text "Your couple ($DwAndDwHeaderVersionCouple) is allowed."
+                Write-HostInfo -Text "Your XWB file header contains known versions ($DwAndDwHeaderVersionCouple)."
             }
             $DwVersionCoupleAllowed = $true
         }
     }
 
     if (-not($DwVersionCoupleAllowed)) {
-        # The versions retrieved from the header of the provided XWB files are not an allowed couple
-        Write-HostWarn -Text "Tool version, aka dwVersion / XACT_CONTENT_VERSION, and File format, aka dwHeaderVersion, are not recognised."
+        # The header of the provided XWB file does not contain known versions.
+        Write-HostWarn -Text "The XWB file header contains unknown values of tool version (dwVersion / XACT_CONTENT_VERSION) and file format (dwHeaderVersion)."
         do {
             $TitleWrongVersionMenu = ""
             $MessageWrongVersionMenu = "Do you want to continue? (Y/N)"
