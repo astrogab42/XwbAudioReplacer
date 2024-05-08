@@ -195,6 +195,15 @@ function Add-AllCustomSoundFiles {
     ##########################
     ###### Build new XWB #####
     ##########################
+    ##### Save Header bytes to header.bin file #####
+    $XwbHeader | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
+    if ($DebugMode) { Write-HostInfo -Text "Your header file: $Header" } 
+    if (-not(Test-Path -Path $Header)) {
+        Write-HostError -Text "File $Header does not exists!"
+        Write-HostError "Fatal Error! Exiting..."
+        exit
+    }
+
     ##### Build xwb file from WAV #####
     Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
     #$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$CacheFolderPath\*.wav" # see XWBTool usage on Documentation for details
@@ -211,7 +220,6 @@ function Add-AllCustomSoundFiles {
     }
 
     ##### Update XWB Header #####
-    $XwbHeader | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
     [GPSTools]::ReplaceBytes($XwbName, $Header, $ByteStreamLimit) # Substitute the first $ByteStreamLimit bytes in the brand-new $XwbName file in current folder
     <# DEPRECATED
     # Specific change of "timestamp" in header
