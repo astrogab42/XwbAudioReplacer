@@ -11,7 +11,7 @@ Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/instal
 
 ### COMPATIBILITY
 
-XWB-Audio-Replacer has been test on Windows 10 and Windows 11 with PowerShell Core 7.4 already installed.
+XWB-Audio-Replacer has been tested on Windows 10 and Windows 11 with PowerShell Core 7.4 already installed.
 Thanks to the cross-compatibility of PowerShell Core with MacOS and Linux, it could potentially work with other operating systems with some small adaptations.
 
 ## XWB-EXTRACTOR
