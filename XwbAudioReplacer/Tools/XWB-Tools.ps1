@@ -83,7 +83,7 @@ function Assert-FileExists {
     #Write-HostInfo -Text "Check existance of $File"
     if (-not(Test-Path $File)) {
         # if the file does not exists
-        Write-HostWarn -Text "The path you selected for you file does not exists."
+        Write-HostWarn -Text "The path you selected for your file does not exists."
         Write-HostInfo -Text "Path: $File"
 
         $Output = $false

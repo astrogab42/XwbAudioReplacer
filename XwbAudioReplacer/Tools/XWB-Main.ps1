@@ -20,45 +20,54 @@ function Add-AllCustomSoundFiles {
     ######## XWB info ########
     ##########################
     ##### Get info from XWB file #####
-    $ByteStreamLimit = 150 # Limit the number of bytes to speed up the process
+    $ByteStreamLimit = 10 # Limit the number of bytes to speed up the process
     $XwbHeader = Get-Content $XwbPath -AsByteStream -TotalCount $ByteStreamLimit # Get content of XWB file as stream of bytes (limit to $ByteStreamLimit)
-
-    # Allowed versions
-    $DwAndDwHeaderVersionsAllowed = @( @(42,42), @(43,42), @(44,42), @(45,43), @(46,44) ) # Allowed coupled values
+    if ($DebugMode) { Write-HostInfo -Text "The first $ByteStreamLimit bytes of $XwbName are: $XwbHeader" }
+    
+    # File format, aka dwHeaderVersion
+    $DwHeaderVersionBytePosition = [uint32]"0x04" # Byte at position 0x04 (see Documentation)
+    $DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition #45
+    if ($DebugMode) {
+        $DwHeaderVersion = [byte]45
+        $DwHeaderVersionType = $DwHeaderVersion.GetType()
+        Write-HostInfo -Text "The dwHeaderVersion of $XwbName is: $DwHeaderVersion of type: $DwHeaderVersionType" 
+    }
 
     # Tool version, aka dwVersion / XACT_CONTENT_VERSION
     $DwVersionBytePosition = [uint32]"0x08" # Byte at position 0x08 (see Documentation)
-    $DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition #45
-    if ($DwVersion -is [int] -or $var -is [double]) {
-        # Check if the extracted value is numeric
-        if ($DebugMode) { Write-HostInfo -Text "dwVersion of original XWB file: $DwVersion" }
-    } else {
-        Write-HostError -Text "Tool version, aka dwVersion / XACT_CONTENT_VERSION, is not numeric. The file $XwbName could be corrupted."
-        Write-HostError "Fatal Error! Exiting..."
-        exit
+    $DwVersion = $XwbHeader[$DwVersionBytePosition] # Get byte in position $DwVersionBytePosition #43
+    if ($DebugMode) {
+        $DwVersion = [byte]43
+        $DwVersionType = $DwVersion.GetType()
+        Write-HostInfo -Text "The dwVersion of $XwbName is: $DwVersion of type: $DwVersionType" 
     }
 
-    # File format, aka dwHeaderVersion
-    $DwHeaderVersionBytePosition = [uint32]"0x04" # Byte at position 0x04 (see Documentation)
-    $DwHeaderVersion = $XwbHeader[$DwHeaderVersionBytePosition] # Get byte in position $DwHeaderVersionBytePosition #43
-    if ($DwVersion -is [int] -or $var -is [double]) {
-        # Check if the extracted value is numeric
-        if ($DebugMode) { Write-HostInfo -Text "dwHeaderVersion of original XWB file: $DwHeaderVersion" }
-    } else {
-        Write-HostError -Text "File format, aka dwHeaderVersion, is not numeric. The file $XwbName could be corrupted."
-        Write-HostError "Fatal Error! Exiting..."
-        exit
+    # Create version couple
+    $DwAndDwHeaderVersionCouple = @($DwHeaderVersion,$DwVersion)
+   
+    # Known Dw and DwHeader versions
+    $DwAndDwHeaderVersionsAllowed = @( @(42,42), @(43,42), @(44,42), @(45,43), @(46,44) ) # Allowed coupled values
+    $DwVersionCoupleAllowed = $false
+    foreach ($versionPair in $DwAndDwHeaderVersionsAllowed) {
+        $versionPair[0] = [byte]$versionPair[0]
+        $versionPair[1] = [byte]$versionPair[1]
+        if ($versionPair[0] -eq $DwAndDwHeaderVersionCouple[0] -and $versionPair[1] -eq $DwAndDwHeaderVersionCouple[1]) {
+            if ($DebugMode) {
+
+                Write-HostInfo -Text "Your XWB file header contains known versions ($DwAndDwHeaderVersionCouple)."
+            }
+            $DwVersionCoupleAllowed = $true
+        }
     }
 
-    $DwAndDwHeaderVersionCouple = @($DwVersion,$DwHeaderVersion)
-    if ($DwAndDwHeaderVersionsAllowed -notcontains $DwAndDwHeaderVersionCouple) { 
-        # The versions retrieved from the header of the provided XWB files are not an allowed couple
-        Write-HostError -Text "Tool version, aka dwVersion / XACT_CONTENT_VERSION, and File format, aka dwHeaderVersion, are not recognised."
+    if (-not($DwVersionCoupleAllowed)) {
+        # The header of the provided XWB file does not contain known versions.
+        Write-HostWarn -Text "The XWB file header contains unknown values of tool version (dwVersion / XACT_CONTENT_VERSION) and file format (dwHeaderVersion)."
         do {
             $TitleWrongVersionMenu = ""
             $MessageWrongVersionMenu = "Do you want to continue? (Y/N)"
             $OptionsWrongVersionMenu = @(
-            [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "The script will continue, but there is a probability of high unsuccessful results due to the previous errors.")
+            [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "The script will continue, but there is a probability of unsuccessful results due to the previous warning.")
             [System.Management.Automation.Host.ChoiceDescription]::new("&No", "The script will stop.")
             )
             $DefaultWrongVersionMenu = 0
@@ -186,6 +195,15 @@ function Add-AllCustomSoundFiles {
     ##########################
     ###### Build new XWB #####
     ##########################
+    ##### Save Header bytes to header.bin file #####
+    $XwbHeader | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
+    if ($DebugMode) { Write-HostInfo -Text "Your header file: $Header" } 
+    if (-not(Test-Path -Path $Header)) {
+        Write-HostError -Text "File $Header does not exists!"
+        Write-HostError "Fatal Error! Exiting..."
+        exit
+    }
+
     ##### Build xwb file from WAV #####
     Write-HostInfo -Text "Building $XwbName with XWBTool version $DwVersion/$DwHeaderVersion..."
     #$buildXWB = .\XWBTool_GPS.exe -o $XwbName -tv $DwVersion -fv $DwHeaderVersion -s -f -y "$CacheFolderPath\*.wav" # see XWBTool usage on Documentation for details
@@ -202,7 +220,6 @@ function Add-AllCustomSoundFiles {
     }
 
     ##### Update XWB Header #####
-    $XwbHeader | Set-Content -Path $Header -AsByteStream # Save header to temporary binary file
     [GPSTools]::ReplaceBytes($XwbName, $Header, $ByteStreamLimit) # Substitute the first $ByteStreamLimit bytes in the brand-new $XwbName file in current folder
     <# DEPRECATED
     # Specific change of "timestamp" in header
