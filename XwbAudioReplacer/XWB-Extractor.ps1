@@ -55,7 +55,8 @@ if (Test-Path -Path "*.wav") {
     Write-HostInfo -Text "Number of extracted files is $fileCount"
 
 } else {
-    Write-HostError -Text "No files extracted from $xwbInputFile"
+    Write-HostError -Text "It seems like that the XWB file $xwbInputFile does not contain any WAV files."
+    Write-HostInfo -Text "Please, check its content with an external tool [suggestion will be provided in future releases]"
     exit
 }
 Write-HostInfo "Moving WAV files to destination folder $wavOutputFolder"
