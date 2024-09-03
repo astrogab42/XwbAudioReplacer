@@ -8,7 +8,6 @@ Set-WelcomeMessage -ScriptName "XWB-Extractor"
 # XWB File
 Write-HostInfo -Text "Provide the XWB file you want to extract."
 $xwbInputFile = (Read-Host "Please, enter the path to the XWB file").Replace("`"", "") # Prompt user to insert new value from keyboard
-#$xwbInputFile = "C:\GOG Games\Monkey Island 1 SE\audio\Speech.xwb" # Path to XWB file
 $Output = Assert-FileExists -File $xwbInputFile
 if (-not($Output)) {
     exit
@@ -17,9 +16,9 @@ if (-not($Output)) {
 # Destination folder for extraction
 Write-HostInfo -Text "Now, provide the folder where you want to save the extracted WAV files. The folder MUST be empty."
 $wavOutputFolder = (Read-Host "Please, enter the path to the folder where to extract the wav files").Replace("`"", "") # Prompt user to insert new value from keyboard
-#$wavOutputFolder = "C:\MISE-ITA\MISE-ITA-Master\Dialoghi\Tracce-WAV" # Folder that will be filled with extraction of wav files
 $Output = Assert-FolderExists -Folder $wavOutputFolder
 if (-not($Output)) {
+    Write-HostInfo -Text "The folder does not exist."
     $Title = ""
     $Message = "Do you want to create it?"
     $Options = "&Yes", "&No"
@@ -27,7 +26,7 @@ if (-not($Output)) {
     do {
         $Response = $Host.UI.PromptForChoice($Title, $Message, $Options, $Default)
         if ($Response -eq 0) {
-            #Write-HostInfo -Text "Creating new folder..."
+            Write-HostInfo -Text "Creating new folder..."
             New-Item -Path $wavOutputFolder -ItemType Directory
         }
         else {
@@ -39,13 +38,26 @@ if (-not($Output)) {
 if (-not((Get-ChildItem $wavOutputFolder | Measure-Object).Count -eq 0)) {
     # if the folder is not empty
     Write-HostError -Text "The destination folder is not empty. The extractor could have been already executed or the specified output folder is use for other purposes."
-    Write-HostInfo -Text "Hint! Remember that you can use option R in XWB-Reparcker to restore the original XWB file"
+    Write-HostInfo -Text "Hint! Remember that you can use option R in XWB-Repacker to restore the original XWB file"
     exit
 }
 ##### MAIN #####
 # extract wav from xwb
 Write-HostInfo "Extracting WAV files from XWB file"
 & (PowerShell -Command "Get-ChildItem -Path '.\' -Filter 'towav.exe' -Recurse | Select-Object -ExpandProperty FullName | Resolve-Path -Relative") $xwbInputFile | Out-Null
+# Check if any file with the pattern exists in the current directory
+if (Test-Path -Path "*.wav") {
+    # Get all .wav files in the current directory
+    $files = Get-ChildItem -Path . -Filter *.wav
+    # Count the number of .wav files
+    $fileCount = $files.Count
+    # Output the count
+    Write-HostInfo -Text "Number of extracted files is $fileCount"
+
+} else {
+    Write-HostError -Text "No files extracted from $xwbInputFile"
+    exit
+}
 Write-HostInfo "Moving WAV files to destination folder $wavOutputFolder"
 Move-Item *.wav $wavOutputFolder
 
