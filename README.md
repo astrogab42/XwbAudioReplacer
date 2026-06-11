@@ -61,6 +61,10 @@ The game should now be ready with custom audio files inserted.
 
 We donate this script to the community so that anyone with little technical skills can customise their favourite games by inserting their own music, sounds, or recording all voicelines in their own language.
 
+## LICENSE
+
+This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
+
 ## NOTES FOR THE COMMUNITY
 As reported above, at the moment the script only allows the use of audio files with a byte size less than or equal to that of the original audio file. If desired, this limitation can be removed by rebuilding the XSB file. We leave this information here for our or the community's future developments.
 
